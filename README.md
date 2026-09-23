@@ -99,10 +99,28 @@ export function TextEditor() {
 
 ## Проверки
 
+Unit-тесты запускаются через Vitest: он использует Vite и поддерживает TypeScript,
+поэтому не требует отдельной настройки трансформации TS/ESM, как Jest.
+Тесты находятся рядом с кодом в `*.test.ts` и работают в Node без браузера.
+
 ```powershell
+npm.cmd test
+npm.cmd run test:watch
+npm.cmd run test:coverage
 npm.cmd run build
 npm.cmd run lint
 ```
+
+`test` выполняет один прогон, `test:watch` следит за изменениями до Ctrl+C.
+Проверяются только наши функции: команды и активность блоков, выбор активного
+блока, начальный документ и передача JSON в `onChange`. Методы редактора заменены
+небольшими заглушками; тесты не создают Tiptap Editor и не рендерят React.
+UI, скриншоты, snapshots и внутренняя логика Tiptap не тестируются.
+
+V8 coverage охватывает `paragraph.ts`, `headings.ts`, `getActiveBlock.ts` и
+`editorOptions.ts`, а не всё приложение. Отчет выводится в терминал и
+`coverage/coverage-summary.json`; папка исключена из Git. Проверка типов
+выполняется командой `build`, отдельно от выполнения тестов.
 
 Документация:
 - https://tiptap.dev/docs/editor/getting-started/install/react

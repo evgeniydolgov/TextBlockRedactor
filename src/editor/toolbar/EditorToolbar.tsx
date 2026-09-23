@@ -1,6 +1,7 @@
 import type { Editor } from '@tiptap/core'
 import { useEditorState } from '@tiptap/react'
 import { editorBlocks } from '../blocks'
+import { getActiveBlock } from '../blocks/getActiveBlock'
 import './toolbar.css'
 
 type EditorToolbarProps = {
@@ -10,10 +11,7 @@ type EditorToolbarProps = {
 export function EditorToolbar({ editor }: EditorToolbarProps) {
   const activeBlock = useEditorState({
     editor,
-    selector: ({ editor }) => {
-      if (!editor) return 'paragraph'
-      return editorBlocks.find((block) => block.isActive(editor))?.id ?? 'paragraph'
-    },
+    selector: ({ editor }) => getActiveBlock(editor),
   })
 
   return (
