@@ -1,0 +1,43 @@
+.document-page {
+  max-width: 800px;
+
+  margin: 0 auto;
+
+  padding: 80px 32px 32px;
+}
+
+.eyebrow {
+  color: #787774;
+
+  font-size: 11px;
+
+  letter-spacing: .16em;
+}
+
+.document-page > header h1 {
+  margin: 22px 0 10px;
+
+  font-size: clamp(32px, 5vw, 42px);
+
+  letter-spacing: -.035em;
+}
+
+.description {
+  color: #787774;
+
+  margin: 0 0 32px;
+}
+
+.document-page > footer {
+  color: #787774;
+
+  font-size: 12px;
+
+  margin-top: 32px;
+}
+
+@media (max-width: 600px) {
+  .document-page {
+    padding: 40px 20px 24px;
+  }
+}

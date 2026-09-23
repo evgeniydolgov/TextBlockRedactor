@@ -1,0 +1,41 @@
+.editor-toolbar {
+  display: flex;
+
+  gap: 4px;
+
+  padding: 8px 0;
+
+  border-bottom: 1px solid #eeedea;
+}
+
+.editor-toolbar button {
+  background: transparent;
+
+  color: #787774;
+
+  border: 0;
+
+  border-radius: 4px;
+
+  padding: 6px 12px;
+
+  cursor: pointer;
+
+  font-size: 14px;
+}
+
+.editor-toolbar button:hover {
+  background: #f5f5f3;
+}
+
+.editor-toolbar button[aria-pressed='true'] {
+  background: #eeedea;
+
+  color: #37352f;
+}
+
+.editor-toolbar button:focus-visible {
+  outline: 2px solid #718eab;
+
+  outline-offset: 2px;
+}
