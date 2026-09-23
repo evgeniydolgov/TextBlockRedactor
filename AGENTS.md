@@ -2,6 +2,13 @@
 
 Проект: локальный текстовый редактор на React + TypeScript + Vite + Tiptap OSS.
 
+OpenSpec подключён к Codex через `.agents/skills/`.
+Вызов `$openspec-propose <описание>` запускает подготовку предложения.
+Используйте соответствующий установленный навык; реализация вызывается через
+`$openspec-apply-change`, архивация — через `$openspec-archive-change`.
+В командах этих навыков заменяйте `openspec <аргументы>` на
+`npm.cmd run spec -- <аргументы>`: CLI установлен локально, обёртка отключает телеметрию.
+
 Перед работой прочитайте:
 1. [Процесс](docs/agents/README.md).
 2. [Соглашения](docs/agents/conventions.md).
