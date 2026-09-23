@@ -1,6 +1,7 @@
 import { expect, it, vi } from 'vitest'
 import { transactionStub } from '../testing/transactionStub'
 import { splitWithBlockIds } from './splitWithBlockIds'
+import { validate, version } from 'uuid'
 
 it.each([2, 5, 12])('keeps the original ID on the first fragment of size %s', (size) => {
   const { props, tr, nodes, map, slice } = transactionStub()
@@ -48,4 +49,7 @@ it('uses a fresh UUID by default', () => {
   expect(nodes.get(0)!.attrs.id).toBe('a')
   expect(nodes.get(5)!.attrs.id).toEqual(expect.any(String))
   expect(nodes.get(5)!.attrs.id).not.toBe('a')
+  const id = nodes.get(5)!.attrs.id as string
+  expect(validate(id)).toBe(true)
+  expect(version(id)).toBe(7)
 })

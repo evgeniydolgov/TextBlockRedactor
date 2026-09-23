@@ -9,6 +9,8 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json-summary'],
       include: [
+        'src/shared/ids.ts',
+        'src/editor/identity/uniqueIdOptions.ts',
         'src/editor/blocks/paragraph.ts',
         'src/editor/blocks/headings.ts',
         'src/editor/blocks/getActiveBlock.ts',

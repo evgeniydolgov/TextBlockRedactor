@@ -4,6 +4,7 @@ import Text from '@tiptap/extension-text'
 import UniqueID from '@tiptap/extension-unique-id'
 import { NoteHeading } from './identity/NoteHeading'
 import { BlockIdentity } from './identity/BlockIdentity'
+import { uniqueIdOptions } from './identity/uniqueIdOptions'
 import { UndoRedo } from '@tiptap/extensions'
 import { headingLevels } from './blocks/headings'
 
@@ -12,7 +13,7 @@ export const editorExtensions = [
   Paragraph,
   Text,
   NoteHeading.configure({ levels: [...headingLevels] }),
-  UniqueID.configure({ types: ['paragraph', 'heading'], attributeName: 'id' }),
+  UniqueID.configure(uniqueIdOptions),
   BlockIdentity,
   UndoRedo,
 ]

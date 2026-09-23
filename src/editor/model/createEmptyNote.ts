@@ -1,7 +1,8 @@
 import { defaultBlockProps } from './noteBlock'
 import type { NoteDocument } from './noteBlock'
+import { createId } from '../../shared/ids'
 
-export function createEmptyNote(generateId: () => string = () => crypto.randomUUID()): NoteDocument {
+export function createEmptyNote(generateId: () => string = createId): NoteDocument {
   return [{
     id: generateId(),
     type: 'paragraph',

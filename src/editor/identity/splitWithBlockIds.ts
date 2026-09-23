@@ -1,8 +1,9 @@
 import type { Command } from '@tiptap/core'
+import { createId } from '../../shared/ids'
 
 export function splitWithBlockIds(
   command: Command,
-  generateId: () => string = () => crypto.randomUUID(),
+  generateId: () => string = createId,
 ): Command {
   return (props) => {
     const { tr, dispatch } = props

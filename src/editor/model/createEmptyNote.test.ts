@@ -1,5 +1,6 @@
 import { expect, it, vi } from 'vitest'
 import { createEmptyNote } from './createEmptyNote'
+import { validate, version } from 'uuid'
 
 it('creates independent blocks with IDs from the generator', () => {
   const generateId = vi.fn().mockReturnValueOnce('a').mockReturnValueOnce('b')
@@ -19,5 +20,7 @@ it('creates independent blocks with IDs from the generator', () => {
 it('generates distinct nonempty IDs by default', () => {
   const first = createEmptyNote()[0].id
   expect(first).not.toBe('')
+  expect(validate(first)).toBe(true)
+  expect(version(first)).toBe(7)
   expect(createEmptyNote()[0].id).not.toBe(first)
 })
