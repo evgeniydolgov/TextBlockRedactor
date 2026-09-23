@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "spec": "node scripts/openspec.mjs",
+    "spec:validate": "node scripts/openspec.mjs validate --all --strict --no-interactive"
   },
   "dependencies": {
     "@tiptap/core": "^3.31.3",
@@ -22,6 +24,7 @@
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
+    "@fission-ai/openspec": "1.13.1",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
