@@ -1,10 +1,19 @@
 import type { Editor } from '@tiptap/core'
-import { emptyDocument } from './document'
+import { createEmptyNote } from './createEmptyNote'
+import { blocksToTiptap } from './blocksToTiptap'
+import { tiptapToBlocks } from './tiptapToBlocks'
+import { validateNote } from './validateNote'
 import type { TextEditorProps } from './document'
 
-export function createEditorOptions({ initialContent = emptyDocument, onChange }: TextEditorProps) {
+export function createUpdateHandler(onChange: TextEditorProps['onChange']) {
+  return ({ editor }: { editor: Pick<Editor, 'getJSON'> }) => onChange?.(tiptapToBlocks(editor.getJSON()))
+}
+
+export function createEditorOptions({ initialContent, onChange }: TextEditorProps) {
+  const blocks = initialContent === undefined ? [] : initialContent
+  validateNote(blocks)
   return {
-    content: initialContent,
+    content: blocksToTiptap(blocks.length ? blocks : createEmptyNote()),
     editorProps: {
       attributes: {
         class: 'editor-content',
@@ -14,6 +23,6 @@ export function createEditorOptions({ initialContent = emptyDocument, onChange }
         'aria-describedby': 'editor-hint',
       },
     },
-    onUpdate: ({ editor }: { editor: Pick<Editor, 'getJSON'> }) => onChange?.(editor.getJSON()),
+    onUpdate: createUpdateHandler(onChange),
   }
 }

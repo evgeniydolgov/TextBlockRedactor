@@ -1,47 +1,68 @@
-import type { Editor, JSONContent } from '@tiptap/core'
-import { describe, expect, it, vi } from 'vitest'
-import { emptyDocument } from './document'
-import { createEditorOptions } from './editorOptions'
+import type { Editor } from '@tiptap/core'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { createEditorOptions, createUpdateHandler } from './editorOptions'
+import { mixedNote, paragraph } from '../testing/noteFixtures'
+import { blocksToTiptap } from './blocksToTiptap'
+import { tiptapToBlocks } from './tiptapToBlocks'
+
+afterEach(() => vi.restoreAllMocks())
 
 describe('createEditorOptions', () => {
-  it('uses the empty document when initialContent is omitted', () => {
-    expect(createEditorOptions({}).content).toBe(emptyDocument)
+  it.each([{}, { initialContent: [] }])('creates an empty block for %j', (props) => {
+    const note = tiptapToBlocks(createEditorOptions(props).content)
+    expect(note).toEqual([paragraph(expect.any(String))])
+    expect(note[0].id).not.toBe(tiptapToBlocks(createEditorOptions(props).content)[0].id)
   })
 
-  it('passes through the supplied document without mutation', () => {
-    const content: JSONContent = {
-      type: 'doc',
-      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Черновик' }] }],
-    }
+  it('converts the supplied blocks without mutation', () => {
+    const content = mixedNote()
     const before = structuredClone(content)
-    expect(createEditorOptions({ initialContent: content }).content).toBe(content)
+    expect(tiptapToBlocks(createEditorOptions({ initialContent: content }).content)).toEqual(content)
     expect(content).toEqual(before)
   })
 
-  it('forwards the current JSON once for each update', () => {
-    const first: ReturnType<Editor['getJSON']> = { type: 'doc', attrs: undefined, content: [] }
-    const second: ReturnType<Editor['getJSON']> = {
-      type: 'doc', attrs: undefined, content: [{ type: 'paragraph', attrs: undefined }],
-    }
-    const getJSON = vi.fn<Editor['getJSON']>().mockReturnValueOnce(first).mockReturnValueOnce(second)
+  it('emits converted snapshots on updates without logging from the editor', () => {
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {})
+    const first = [paragraph('a', 'До')]
+    const second = [paragraph('a', 'После')]
+    const getJSON = vi.fn<Editor['getJSON']>()
+      .mockReturnValueOnce(blocksToTiptap(first) as ReturnType<Editor['getJSON']>)
+      .mockReturnValueOnce(blocksToTiptap(second) as ReturnType<Editor['getJSON']>)
     const onChange = vi.fn()
     const options = createEditorOptions({ onChange })
 
     options.onUpdate({ editor: { getJSON } })
     expect(getJSON).toHaveBeenCalledTimes(1)
     expect(onChange).toHaveBeenCalledExactlyOnceWith(first)
-    expect(onChange.mock.calls[0][0]).toBe(first)
+    expect(onChange.mock.calls[0][0]).toEqual(first)
 
     options.onUpdate({ editor: { getJSON } })
     expect(getJSON).toHaveBeenCalledTimes(2)
     expect(onChange).toHaveBeenCalledTimes(2)
-    expect(onChange.mock.calls[1][0]).toBe(second)
+    expect(onChange.mock.calls[1][0]).toEqual(second)
+    expect(onChange.mock.calls[0][0]).toEqual(first)
+    expect(log).not.toHaveBeenCalled()
   })
 
   it('skips serialization when no callback is supplied', () => {
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {})
     const getJSON = vi.fn(() => { throw new Error('Serialization should be skipped') })
     const options = createEditorOptions({})
     expect(() => options.onUpdate({ editor: { getJSON } })).not.toThrow()
     expect(getJSON).not.toHaveBeenCalled()
+    expect(log).not.toHaveBeenCalled()
+  })
+
+  it('can update the callback without recreating initial content', () => {
+    const first = vi.fn()
+    const current = vi.fn()
+    const editor = { getJSON: vi.fn<Editor['getJSON']>()
+      .mockReturnValue(blocksToTiptap([paragraph('a')]) as ReturnType<Editor['getJSON']>) }
+    const options = createEditorOptions({ onChange: first })
+    const next = { ...options, onUpdate: createUpdateHandler(current) }
+    next.onUpdate({ editor })
+    expect(next.content).toBe(options.content)
+    expect(current).toHaveBeenCalledExactlyOnceWith([paragraph('a')])
+    expect(first).not.toHaveBeenCalled()
   })
 })

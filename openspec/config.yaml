@@ -5,7 +5,10 @@ context: |
   Стек: React 19, TypeScript, Vite, Tiptap OSS 3, CSS.
   Backend, облако, коллаборация и платные расширения отсутствуют.
   Сейчас: текст, абзацы, H1-H3, undo/redo; данные только в памяти.
-  Один экземпляр редактора на документ; initialContent и onChange(JSON).
+  Один экземпляр редактора на документ; initialContent и onChange(NoteDocument).
+  NoteDocument — плоский массив BlockNote-совместимых paragraph/heading H1-H3.
+  При split старый ID всегда у первого фрагмента, включая пустой; новый — у второго.
+  Страница выводит JSON блоков в console.log, без сохранения.
   Прочитай AGENTS.md и docs/agents/README.md.
   Документы пиши по-русски; синтаксис OpenSpec оставляй на английском.
 

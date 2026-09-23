@@ -1,11 +1,6 @@
-import type { JSONContent } from '@tiptap/core'
+import type { NoteDocument } from './noteBlock'
 
 export type TextEditorProps = {
-  initialContent?: JSONContent
-  onChange?: (document: JSONContent) => void
-}
-
-export const emptyDocument: JSONContent = {
-  type: 'doc',
-  content: [{ type: 'paragraph' }],
+  initialContent?: NoteDocument
+  onChange?: (document: NoteDocument) => void
 }

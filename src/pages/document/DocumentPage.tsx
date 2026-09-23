@@ -1,4 +1,5 @@
 import { TextEditor } from '../../editor/TextEditor'
+import { logNoteBlocks } from './logNoteBlocks'
 import './document-page.css'
 
 export function DocumentPage() {
@@ -9,7 +10,7 @@ export function DocumentPage() {
         <h1>Новая страница</h1>
         <p className="description">Место для ваших мыслей.</p>
       </header>
-      <TextEditor />
+      <TextEditor onChange={logNoteBlocks} />
       <footer>Черновик · изменения пока не сохраняются</footer>
     </main>
   )

@@ -4,6 +4,7 @@
 
 Начните с [AGENTS.md](AGENTS.md) и [процесса работы](docs/agents/README.md).
 Текущие требования: [спецификация редактора](openspec/specs/text-editor/spec.md).
+Блочный API до архивации описан в [изменении](openspec/changes/blocknote-compatible-note-model/specs/text-editor/spec.md).
 Проверка спецификаций: `npm.cmd run spec:validate`.
 
 React + TypeScript + Vite + Tiptap OSS + обычный CSS.
@@ -30,7 +31,7 @@ npm.cmd run dev
 npm.cmd create vite@latest text-editor -- --template react-ts
 cd text-editor
 npm.cmd install
-npm.cmd install @tiptap/react @tiptap/pm @tiptap/core @tiptap/extension-document @tiptap/extension-paragraph @tiptap/extension-text @tiptap/extension-heading @tiptap/extensions
+npm.cmd install @tiptap/react @tiptap/pm @tiptap/core @tiptap/extension-document @tiptap/extension-paragraph @tiptap/extension-text @tiptap/extension-heading @tiptap/extension-unique-id @tiptap/extensions
 npm.cmd run dev
 ```
 
@@ -48,27 +49,28 @@ src/
     TextEditor.tsx         # редактор и кнопки типов абзаца
     extensions.ts          # схема документа и расширения
     editor.css             # стили содержимого
+    model/                 # блочная модель и преобразования Tiptap
+    identity/              # сохранение ID при split и смене типа
+  pages/document/          # страница и logNoteBlocks
 ```
 
-Подключены Document, Paragraph, Text, Heading (H1–H3), UndoRedo.
+Подключены Document, Paragraph, Text, Heading (H1–H3), UndoRedo, UniqueID и адаптеры ID.
 StarterKit не используется: на этом этапе списки, цитаты и форматирование не нужны.
 
 ## Самый короткий пример
 
-Список расширений уже определён в `src/editor/extensions.ts`.
-Минимальный компонент, использующий этот список:
+Публичный компонент принимает массив блоков; Tiptap JSON остается внутри:
 
 ```tsx
-import { EditorContent, useEditor } from '@tiptap/react'
-import { editorExtensions } from './extensions'
+import { TextEditor } from './editor/TextEditor'
+import { createEmptyNote } from './editor/model/createEmptyNote'
 
-export function TextEditor() {
-  const editor = useEditor({
-    extensions: editorExtensions,
-    content: { type: 'doc', content: [{ type: 'paragraph' }] },
-  })
+const initialContent = createEmptyNote()
 
-  return <EditorContent editor={editor} />
+export function MyNote() {
+  return <TextEditor initialContent={initialContent} onChange={(blocks) => {
+    console.log('[note:blocks]', JSON.stringify(blocks, null, 2))
+  }} />
 }
 ```
 
@@ -87,9 +89,16 @@ export function TextEditor() {
 
 ## Аккуратное расширение
 
-`initialContent` задаёт начальный JSON при создании редактора.
+`initialContent` задаёт начальный `NoteDocument` — массив блоков paragraph/heading.
 Это не управляемое React-поле: изменение этого пропа не загружает новый документ.
-`onChange` получает `editor.getJSON()` после изменений.
+`onChange` получает новый массив блоков после изменений, а не `editor.getJSON()`.
+ID сохраняется при вводе и смене типа. При разделении старый ID всегда у первого
+фрагмента, включая пустой; второй получает новый ID.
+
+Чтобы увидеть результат, откройте DevTools → Console и начните редактирование.
+Страница выводит `[note:blocks]` с форматированным JSON после изменений документа.
+Выделение текста само по себе не создает запись. Сохранения нет.
+[Формат, ограничения и ручная проверка](docs/note-blocks.md).
 
 Позже подключите сохранение через onChange, вне компонента редактора.
 Для новых типов блоков добавляйте расширения в extensions.ts.
@@ -113,12 +122,12 @@ npm.cmd run lint
 
 `test` выполняет один прогон, `test:watch` следит за изменениями до Ctrl+C.
 Проверяются только наши функции: команды и активность блоков, выбор активного
-блока, начальный документ и передача JSON в `onChange`. Методы редактора заменены
+блока, конвертация/валидация заметки, адаптеры ID, onChange и logger. Методы редактора заменены
 небольшими заглушками; тесты не создают Tiptap Editor и не рендерят React.
 UI, скриншоты, snapshots и внутренняя логика Tiptap не тестируются.
 
-V8 coverage охватывает `paragraph.ts`, `headings.ts`, `getActiveBlock.ts` и
-`editorOptions.ts`, а не всё приложение. Отчет выводится в терминал и
+V8 coverage охватывает собственную логику из `coverage.include` в vitest.config.ts,
+а не всё приложение. Отчет выводится в терминал и
 `coverage/coverage-summary.json`; папка исключена из Git. Проверка типов
 выполняется командой `build`, отдельно от выполнения тестов.
 
