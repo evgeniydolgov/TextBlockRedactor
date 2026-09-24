@@ -4,8 +4,12 @@ import { createEditorOptions, createUpdateHandler } from './editorOptions'
 import { mixedNote, paragraph } from '../testing/noteFixtures'
 import { blocksToTiptap } from './blocksToTiptap'
 import { tiptapToBlocks } from './tiptapToBlocks'
+import { createDebouncedChange } from './createDebouncedChange'
 
-afterEach(() => vi.restoreAllMocks())
+afterEach(() => {
+  vi.restoreAllMocks()
+  vi.useRealTimers()
+})
 
 describe('createEditorOptions', () => {
   it.each([{}, { initialContent: [] }])('creates an empty block for %j', (props) => {
@@ -21,7 +25,8 @@ describe('createEditorOptions', () => {
     expect(content).toEqual(before)
   })
 
-  it('emits converted snapshots on updates without logging from the editor', () => {
+  it('delivers delayed snapshots without logging and preserves snapshots and IDs', () => {
+    vi.useFakeTimers()
     const log = vi.spyOn(console, 'log').mockImplementation(() => {})
     const first = [paragraph('a', 'До')]
     const second = [paragraph('a', 'После')]
@@ -29,15 +34,20 @@ describe('createEditorOptions', () => {
       .mockReturnValueOnce(blocksToTiptap(first) as ReturnType<Editor['getJSON']>)
       .mockReturnValueOnce(blocksToTiptap(second) as ReturnType<Editor['getJSON']>)
     const onChange = vi.fn()
-    const options = createEditorOptions({ onChange })
+    const changes = createDebouncedChange(onChange)
+    const options = createEditorOptions({ onChange: changes.schedule })
 
     options.onUpdate({ editor: { getJSON } })
     expect(getJSON).toHaveBeenCalledTimes(1)
+    expect(onChange).not.toHaveBeenCalled()
+    vi.advanceTimersByTime(1000)
     expect(onChange).toHaveBeenCalledExactlyOnceWith(first)
     expect(onChange.mock.calls[0][0]).toEqual(first)
 
     options.onUpdate({ editor: { getJSON } })
     expect(getJSON).toHaveBeenCalledTimes(2)
+    expect(onChange).toHaveBeenCalledTimes(1)
+    vi.advanceTimersByTime(1000)
     expect(onChange).toHaveBeenCalledTimes(2)
     expect(onChange.mock.calls[1][0]).toEqual(second)
     expect(onChange.mock.calls[0][0]).toEqual(first)

@@ -5,6 +5,7 @@
 Начните с [AGENTS.md](AGENTS.md) и [процесса работы](docs/agents/README.md).
 Текущие требования: [спецификация редактора](openspec/specs/text-editor/spec.md).
 Блочный API до архивации описан в [изменении](openspec/changes/blocknote-compatible-note-model/specs/text-editor/spec.md).
+Автосохранение до архивации описано в [изменении](openspec/changes/debounce-local-note-save/specs/text-editor/spec.md).
 Проверка спецификаций: `npm.cmd run spec:validate`.
 
 React + TypeScript + Vite + Tiptap OSS + обычный CSS.
@@ -49,9 +50,9 @@ src/
     TextEditor.tsx         # редактор и кнопки типов абзаца
     extensions.ts          # схема документа и расширения
     editor.css             # стили содержимого
-    model/                 # блочная модель и преобразования Tiptap
+    model/                 # блочная модель, преобразования и задержка передачи
     identity/              # сохранение ID при split и смене типа
-  pages/document/          # страница и logNoteBlocks
+  pages/document/          # страница, localStorage и logNoteBlocks
 ```
 
 Подключены Document, Paragraph, Text, Heading (H1–H3), UndoRedo, UniqueID и адаптеры ID.
@@ -68,14 +69,14 @@ import { createEmptyNote } from './editor/model/createEmptyNote'
 const initialContent = createEmptyNote()
 
 export function MyNote() {
-  return <TextEditor initialContent={initialContent} onChange={(blocks) => {
+  return <TextEditor initialContent={initialContent} saveDelayMs={1000} onChange={(blocks) => {
     console.log('[note:blocks]', JSON.stringify(blocks, null, 2))
   }} />
 }
 ```
 
 В рабочем компоненте добавлены только кнопки «Текст / H1 / H2 / H3»,
-доступные подписи и интерфейс initialContent/onChange.
+доступные подписи и интерфейс initialContent/onChange/saveDelayMs.
 
 ## Как пользоваться
 
@@ -85,22 +86,30 @@ export function MyNote() {
 - В начале строки можно набрать `# `, `## ` или `### ` для заголовка.
 - Ctrl+Z — отмена, Ctrl+Shift+Z — повтор (на macOS — Cmd).
 
-Текст хранится только в памяти. Обновление страницы сбрасывает документ.
+Заметка сохраняется в localStorage через секунду после последнего изменения
+и восстанавливается после обновления страницы. При закрытии, обновлении или
+скрытии вкладки ожидающие изменения сохраняются сразу, если браузер доставляет событие.
+Время ожидания меняется константой `NOTE_SAVE_DELAY_MS` в
+[DocumentPage.tsx](src/pages/document/DocumentPage.tsx), передаваемой в проп `saveDelayMs`.
+Значение `0` отключает ожидание. Ошибки загрузки и сохранения отображаются под редактором.
 
 ## Аккуратное расширение
 
 `initialContent` задаёт начальный `NoteDocument` — массив блоков paragraph/heading.
 Это не управляемое React-поле: изменение этого пропа не загружает новый документ.
-`onChange` получает новый массив блоков после изменений, а не `editor.getJSON()`.
+`onChange` получает последний массив блоков после паузы `saveDelayMs` (по умолчанию
+1000 мс), а не `editor.getJSON()`. Каждый ввод перезапускает ожидание.
 ID сохраняется при вводе и смене типа. При разделении старый ID всегда у первого
 фрагмента, включая пустой; второй получает новый ID.
 
 Чтобы увидеть результат, откройте DevTools → Console и начните редактирование.
-Страница выводит `[note:blocks]` с форматированным JSON после изменений документа.
-Выделение текста само по себе не создает запись. Сохранения нет.
+Страница выводит `[note:blocks]` с форматированным JSON вместе с отложенной передачей
+или передачей при уходе. Выделение текста само по себе не создает запись.
 [Формат, ограничения и ручная проверка](docs/note-blocks.md).
 
-Позже подключите сохранение через onChange, вне компонента редактора.
+Сохранение подключено через onChange на странице, вне компонента редактора.
+Ключ localStorage — `text-block-redactor:note:v1`, значение — JSON-массив NoteDocument.
+Хранилище относится к текущему origin: другой адрес или порт имеет свою запись.
 Для новых типов блоков добавляйте расширения в extensions.ts.
 Используйте один экземпляр редактора на документ: абзацы и заголовки
 уже являются узлами документа. Меню команд и перетаскивание можно добавить позже,
@@ -122,7 +131,8 @@ npm.cmd run lint
 
 `test` выполняет один прогон, `test:watch` следит за изменениями до Ctrl+C.
 Проверяются только наши функции: команды и активность блоков, выбор активного
-блока, конвертация/валидация заметки, адаптеры ID, onChange и logger. Методы редактора заменены
+блока, конвертация/валидация заметки, адаптеры ID, задержка, lifecycle, localStorage,
+onChange и logger. Методы редактора заменены
 небольшими заглушками; тесты не создают Tiptap Editor и не рендерят React.
 UI, скриншоты, snapshots и внутренняя логика Tiptap не тестируются.
 
