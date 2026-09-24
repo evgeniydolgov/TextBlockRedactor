@@ -12,6 +12,10 @@ context: |
   При уходе/cleanup ожидающий снимок передаётся сразу. Страница сохраняет и логирует блоки.
   Ключ localStorage text-block-redactor:note:v1; загрузка до создания редактора.
   Ошибки storage видны пользователю и не прерывают редактирование.
+  Preview сравнивает начальный/последний обработанный снимок и выводит [note:requests].
+  HTTP не выполняется; before — предыдущий ID, after — следующий, на границах null.
+  Последний цикл записан в text-block-redactor:request-log:v1 без истории и времени.
+  Он содержит requests и storage { key, data, success, error }; не служит базой загрузки.
   Прочитай AGENTS.md и docs/agents/README.md.
   Документы пиши по-русски; синтаксис OpenSpec оставляй на английском.
 

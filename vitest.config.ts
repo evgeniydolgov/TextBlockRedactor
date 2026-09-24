@@ -10,6 +10,12 @@ export default defineConfig({
       reporter: ['text', 'json-summary'],
       include: [
         'src/shared/ids.ts',
+        'src/blocks/requests/diffBlocks.ts',
+        'src/blocks/requests/buildBlockRequests.ts',
+        'src/blocks/requests/createRequestPreview.ts',
+        'src/pages/document/prepareInitialDocument.ts',
+        'src/pages/document/logBlockRequests.ts',
+        'src/pages/document/storage/requestLogStorage.ts',
         'src/editor/identity/uniqueIdOptions.ts',
         'src/editor/blocks/paragraph.ts',
         'src/editor/blocks/headings.ts',
