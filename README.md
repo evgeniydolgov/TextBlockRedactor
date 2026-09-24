@@ -6,7 +6,7 @@
 Текущие требования: [спецификация редактора](openspec/specs/text-editor/spec.md).
 Блочный API до архивации описан в [изменении](openspec/changes/blocknote-compatible-note-model/specs/text-editor/spec.md).
 Автосохранение до архивации описано в [изменении](openspec/changes/debounce-local-note-save/specs/text-editor/spec.md).
-Проверка спецификаций: `npm.cmd run spec:validate`.
+Проверка спецификаций: `npm.cmd run spec:validate` — агентом только по явной команде полного quality gate.
 
 React + TypeScript + Vite + Tiptap OSS + обычный CSS.
 Backend и база данных для этого этапа не нужны. Все операции выполняются в браузере.
@@ -133,15 +133,27 @@ Unit-тесты запускаются через Vitest: он использу�
 поэтому не требует отдельной настройки трансформации TS/ESM, как Jest.
 Тесты находятся рядом с кодом в `*.test.ts` и работают в Node без браузера.
 
+При обычной разработке агент запускает только тесты затронутой области, например:
+
+```powershell
+npm.cmd test -- src/editor/limits/fitInsertion.test.ts
+```
+
+Минимальный type-check используется при возможности ограничить его затронутым кодом;
+если это невозможно, агент указывает ограничение и не запускает полный build.
+Для Markdown достаточно чтения правок и ссылок. [Политика проверок](docs/agents/acceptance.md).
+Команды полного прогона ниже доступны агенту только после явного запроса пользователя,
+например `Run full quality gate`; обычная реализация не разрешает их запуск.
+
 ```powershell
 npm.cmd test
-npm.cmd run test:watch
 npm.cmd run test:coverage
 npm.cmd run build
 npm.cmd run lint
 ```
 
-`test` выполняет один прогон, `test:watch` следит за изменениями до Ctrl+C.
+`test` выполняет один прогон. Для локального watch указывайте test-файл:
+`npm.cmd run test:watch -- src/editor/limits/fitInsertion.test.ts` (до Ctrl+C).
 Проверяются только наши функции: команды и активность блоков, выбор активного
 блока, конвертация/валидация заметки, адаптеры ID, задержка, lifecycle, localStorage,
 onChange, logger, лимиты и планирование вставки. Методы редактора заменены
