@@ -52,6 +52,7 @@ src/
     editor.css             # стили содержимого
     model/                 # блочная модель, преобразования и задержка передачи
     identity/              # сохранение ID при split и смене типа
+    limits/                # бюджеты текста, частичная вставка и адаптеры транзакций
   pages/document/          # страница, localStorage и logNoteBlocks
 ```
 
@@ -69,14 +70,15 @@ import { createEmptyNote } from './editor/model/createEmptyNote'
 const initialContent = createEmptyNote()
 
 export function MyNote() {
-  return <TextEditor initialContent={initialContent} saveDelayMs={1000} onChange={(blocks) => {
+  return <TextEditor initialContent={initialContent} saveDelayMs={1000}
+    maxBlockCharacters={8000} maxNoteCharacters={50000} maxBlocks={100} onChange={(blocks) => {
     console.log('[note:blocks]', JSON.stringify(blocks, null, 2))
   }} />
 }
 ```
 
 В рабочем компоненте добавлены только кнопки «Текст / H1 / H2 / H3»,
-доступные подписи и интерфейс initialContent/onChange/saveDelayMs.
+доступные подписи, initialContent/onChange/saveDelayMs и три пропса лимитов.
 
 ## Как пользоваться
 
@@ -92,6 +94,12 @@ export function MyNote() {
 Время ожидания меняется константой `NOTE_SAVE_DELAY_MS` в
 [DocumentPage.tsx](src/pages/document/DocumentPage.tsx), передаваемой в проп `saveDelayMs`.
 Значение `0` отключает ожидание. Ошибки загрузки и сохранения отображаются под редактором.
+
+Лимиты: 8000 единиц `.length` текста на блок, 50000 на заметку, 100 блоков.
+Настройка `NOTE_CONTENT_LIMITS` в DocumentPage передаётся в пропсы редактора.
+Переполнение блока переносится в обычный paragraph с новым UUID v7; вставка
+принимается частично. При загрузке и уменьшении лимитов хвост обрезается.
+[Точные правила подсчёта, настройки и ручные сценарии](docs/content-limits.md).
 
 ## Аккуратное расширение
 
@@ -136,7 +144,7 @@ npm.cmd run lint
 `test` выполняет один прогон, `test:watch` следит за изменениями до Ctrl+C.
 Проверяются только наши функции: команды и активность блоков, выбор активного
 блока, конвертация/валидация заметки, адаптеры ID, задержка, lifecycle, localStorage,
-onChange и logger. Методы редактора заменены
+onChange, logger, лимиты и планирование вставки. Методы редактора заменены
 небольшими заглушками; тесты не создают Tiptap Editor и не рендерят React.
 UI, скриншоты, snapshots и внутренняя логика Tiptap не тестируются.
 

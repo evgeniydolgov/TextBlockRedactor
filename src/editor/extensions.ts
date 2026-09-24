@@ -7,6 +7,8 @@ import { BlockIdentity } from './identity/BlockIdentity'
 import { uniqueIdOptions } from './identity/uniqueIdOptions'
 import { UndoRedo } from '@tiptap/extensions'
 import { headingLevels } from './blocks/headings'
+import { ContentLimitsExtension } from './limits/ContentLimits'
+import type { LimitController } from './limits/limitController'
 
 export const editorExtensions = [
   Document,
@@ -16,4 +18,9 @@ export const editorExtensions = [
   UniqueID.configure(uniqueIdOptions),
   BlockIdentity,
   UndoRedo,
+]
+
+export const createEditorExtensions = (controller: LimitController) => [
+  ...editorExtensions,
+  ContentLimitsExtension.configure({ controller }),
 ]

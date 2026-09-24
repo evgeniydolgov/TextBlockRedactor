@@ -7,6 +7,11 @@ context: |
   Сейчас: текст, абзацы, H1-H3, undo/redo; одна заметка сохраняется в localStorage.
   Один экземпляр редактора на документ; initialContent и onChange(NoteDocument).
   NoteDocument — плоский массив BlockNote-совместимых paragraph/heading H1-H3.
+  Пропсы maxBlockCharacters/maxNoteCharacters/maxBlocks имеют defaults 8000/50000/100.
+  Считается .length объединённых text (UTF-16); surrogate pairs не разрываются.
+  Переполнение создаёт paragraph с UUID v7. Paste сохраняет только помещающийся префикс.
+  Загрузка и уменьшение лимитов обрезают хвост до отображения; mount не пишет storage.
+  Лимиты экземпляра применяются до onChange, в том числе к IME, merge и undo/redo.
   При split старый ID всегда у первого фрагмента, включая пустой; новый — у второго.
   onChange передаёт последний снимок после паузы saveDelayMs (по умолчанию 1000 мс).
   При уходе/cleanup ожидающий снимок передаётся сразу. Страница сохраняет и логирует блоки.

@@ -8,11 +8,16 @@ import { prepareInitialDocument } from './prepareInitialDocument'
 import './document-page.css'
 
 const NOTE_SAVE_DELAY_MS = 1000
+const NOTE_CONTENT_LIMITS = {
+  maxBlockCharacters: 8000,
+  maxNoteCharacters: 50000,
+  maxBlocks: 100,
+}
 
 export function DocumentPage({ noteId }: { noteId?: string }) {
   const [storage] = useState(() => createNoteStorage())
   const [initialNote] = useState(() => storage.load())
-  const [initialDocument] = useState(() => prepareInitialDocument(initialNote.document))
+  const [initialDocument] = useState(() => prepareInitialDocument(initialNote.document, NOTE_CONTENT_LIMITS))
   const [error, setError] = useState(initialNote.error)
   const [saveNote] = useState(() => createNoteSaveHandler(storage.save, setError, {
     preview: createRequestPreview(initialDocument, noteId),
@@ -30,6 +35,7 @@ export function DocumentPage({ noteId }: { noteId?: string }) {
         initialContent={initialDocument}
         onChange={saveNote}
         saveDelayMs={NOTE_SAVE_DELAY_MS}
+        {...NOTE_CONTENT_LIMITS}
       />
       <footer role="status">{error ?? 'Автосохранение на этом устройстве'}</footer>
     </main>
