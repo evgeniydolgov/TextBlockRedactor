@@ -60,5 +60,20 @@
 .attachment-placeholder button {
   padding: 8px 12px;
   color: #787774;
-  pointer-events: none;
+}
+
+.attachment-placeholder button:disabled {
+  cursor: not-allowed;
+}
+
+.image-block__preview {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.image-block__status {
+  margin: 0 0 8px;
+  color: #787774;
 }

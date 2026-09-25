@@ -30,9 +30,14 @@ export type NoteDocument = NoteBlock[]
 export type AttachmentType = 'image' | 'file'
 export const fileProps = { backgroundColor: 'default', name: '', url: '', caption: '' } as const
 export const imageProps = { ...fileProps, textAlignment: 'left', showPreview: true, previewWidth: undefined } as const
+export type ImageBlockProps = Omit<typeof imageProps, 'url' | 'name' | 'caption'> & {
+  url: string
+  name: string
+  caption: string
+}
 export type AttachmentBlock = { id: string; content?: undefined; children: [] } & (
   | { type: 'file'; props: typeof fileProps }
-  | { type: 'image'; props: typeof imageProps }
+  | { type: 'image'; props: ImageBlockProps }
 )
 export type NoteBlock = TextBlock | AttachmentBlock
 

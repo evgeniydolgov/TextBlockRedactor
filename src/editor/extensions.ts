@@ -10,12 +10,12 @@ import { headingLevels } from './blocks/headings'
 import { ContentLimitsExtension } from './limits/ContentLimits'
 import type { LimitController } from './limits/limitController'
 import { AttachmentKeyboard, ImagePlaceholder, FilePlaceholder } from './blocks/AttachmentNode'
+import type { ImageStorageController } from './images/imageStorage'
 
-export const editorExtensions = [
+const baseEditorExtensions = [
   Document,
   Paragraph,
   Text,
-  ImagePlaceholder,
   FilePlaceholder,
   AttachmentKeyboard,
   NoteHeading.configure({ levels: [...headingLevels] }),
@@ -24,7 +24,12 @@ export const editorExtensions = [
   UndoRedo,
 ]
 
-export const createEditorExtensions = (controller: LimitController) => [
-  ...editorExtensions,
+export const createEditorExtensions = (
+  controller: LimitController,
+  imageStorage: ImageStorageController,
+) => [
+  ...baseEditorExtensions.slice(0, 3),
+  ImagePlaceholder.configure({ storage: imageStorage }),
+  ...baseEditorExtensions.slice(3),
   ContentLimitsExtension.configure({ controller }),
 ]

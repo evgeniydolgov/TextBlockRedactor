@@ -3,14 +3,16 @@ import { Schema } from '@tiptap/pm/model'
 import { EditorState, NodeSelection, TextSelection } from '@tiptap/pm/state'
 import { history, redo, undo } from '@tiptap/pm/history'
 import { describe, expect, it, vi } from 'vitest'
-import { appendAttachment, canAppendAttachment, deleteSelectedAttachment } from './attachmentCommands'
+import { appendAttachment, canAppendAttachment, deleteSelectedAttachment, updateImageAttachment } from './attachmentCommands'
 
 // Only the transaction/history model runs here: no Tiptap editor, DOM or browser.
 const schema = new Schema({ nodes: {
   doc: { content: 'block+' },
   paragraph: { group: 'block', content: 'text*', attrs: { id: { default: null } } },
   text: {},
-  image: { group: 'block', atom: true, attrs: { id: { default: null } } },
+  image: { group: 'block', atom: true, attrs: {
+    id: { default: null }, url: { default: '' }, name: { default: '' }, caption: { default: '' },
+  } },
   file: { group: 'block', atom: true, attrs: { id: { default: null } } },
 } })
 
@@ -109,5 +111,20 @@ describe('attachment commands', () => {
     expect(deleteSelectedAttachment(s.editor, generate)).toBe(false)
     expect(s.dispatch).not.toHaveBeenCalled()
     expect(generate).not.toHaveBeenCalled()
+  })
+
+  it('updates image metadata as an isolated history action and preserves caption', () => {
+    const s = setup()
+    appendAttachment(s.editor, 'image', 5, () => 'image')
+    const pos = s.state.doc.content.size - 1
+    expect(updateImageAttachment(s.editor, pos, { id: 'stored', name: 'photo.png' })).toBe(true)
+    expect(s.state.doc.nodeAt(pos)?.attrs).toEqual({
+      id: 'image', url: 'stored', name: 'photo.png', caption: '',
+    })
+    undo(s.state, s.dispatch)
+    expect(s.state.doc.nodeAt(pos)?.attrs).toEqual({ id: 'image', url: '', name: '', caption: '' })
+    redo(s.state, s.dispatch)
+    expect(s.state.doc.nodeAt(pos)?.attrs.url).toBe('stored')
+    expect(updateImageAttachment(s.editor, 0, { id: 'ignored', name: 'ignored' })).toBe(false)
   })
 })

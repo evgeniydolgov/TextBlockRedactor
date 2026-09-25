@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { heading, paragraph } from '../testing/noteFixtures'
+import { heading, paragraph, populatedImage } from '../testing/noteFixtures'
 import { defaultContentLimits, resolveLimits } from './limits'
 import { blockText, fitsContent, planContent, safeEnd, splitEnds } from './textBudget'
 import { createAttachment } from '../model/noteBlock'
@@ -8,6 +8,7 @@ describe('content budgets', () => {
   it('counts attachment slots without consuming characters', () => {
     expect(blockText(createAttachment('image', 'i'))).toBe('')
     expect(blockText(createAttachment('file', 'f'))).toBe('')
+    expect(blockText(populatedImage())).toBe('')
     expect(planContent(['abc', '', ''], resolveLimits({ maxNoteCharacters: 3 }), [false, true, true]))
       .toEqual([{ index: 0, start: 0, end: 3 }, { index: 1, start: 0, end: 0 }, { index: 2, start: 0, end: 0 }])
   })

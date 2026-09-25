@@ -9,11 +9,17 @@ export function createUpdateHandler(onChange: TextEditorProps['onChange']) {
   return ({ editor }: { editor: Pick<Editor, 'getJSON'> }) => onChange?.(tiptapToBlocks(editor.getJSON()))
 }
 
-export function createEditorOptions({ initialContent, onChange, ...limits }: TextEditorProps) {
+export function createEditorOptions({
+  initialContent,
+  onChange,
+  maxBlockCharacters,
+  maxNoteCharacters,
+  maxBlocks,
+}: TextEditorProps) {
   const blocks = initialContent === undefined ? [] : initialContent
   validateNote(blocks)
   return {
-    content: blocksToTiptap(normalizeNote(blocks, limits)),
+    content: blocksToTiptap(normalizeNote(blocks, { maxBlockCharacters, maxNoteCharacters, maxBlocks })),
     editorProps: {
       attributes: {
         class: 'editor-content',

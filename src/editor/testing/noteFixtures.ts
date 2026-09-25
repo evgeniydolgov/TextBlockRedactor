@@ -1,4 +1,4 @@
-import { createAttachment, type TextBlock, type HeadingLevel } from '../model/noteBlock'
+import { createAttachment, type AttachmentBlock, type TextBlock, type HeadingLevel } from '../model/noteBlock'
 
 export function paragraph(id = 'p1', text = ''): Extract<TextBlock, { type: 'paragraph' }> {
   return {
@@ -25,4 +25,9 @@ export function mixedNote(): TextBlock[] {
 
 export function attachmentNote() {
   return [...mixedNote(), createAttachment('image', 'image1'), createAttachment('file', 'file1')]
+}
+
+export function populatedImage(id = 'image1'): Extract<AttachmentBlock, { type: 'image' }> {
+  const image = createAttachment('image', id)
+  return { ...image, props: { ...image.props, url: 'stored-image-id', name: 'photo.png', caption: 'Подпись' } }
 }

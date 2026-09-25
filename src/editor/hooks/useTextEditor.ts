@@ -6,16 +6,20 @@ import { createEditorOptions, createUpdateHandler } from '../model/editorOptions
 import type { TextEditorProps } from '../model/document'
 import { createDebouncedChange } from '../model/createDebouncedChange'
 import { bindSaveLifecycle } from '../model/bindSaveLifecycle'
+import { createImageStorageController } from '../images/imageStorage'
 
 export function useTextEditor(props: TextEditorProps) {
   const [changes] = useState(() => createDebouncedChange(props.onChange, props.saveDelayMs))
   const [initialOptions] = useState(() => createEditorOptions(props))
   const [limits] = useState(() => createLimitController(props))
-  const [extensions] = useState(() => createEditorExtensions(limits))
+  const [imageStorage] = useState(() => createImageStorageController(props.imageStorage))
+  const [extensions] = useState(() => createEditorExtensions(limits, imageStorage))
 
   useLayoutEffect(() => {
     changes.configure(props.onChange, props.saveDelayMs)
   }, [changes, props.onChange, props.saveDelayMs])
+
+  useLayoutEffect(() => imageStorage.configure(props.imageStorage), [imageStorage, props.imageStorage])
 
   useEffect(() => bindSaveLifecycle(changes.flush, window, document), [changes])
 

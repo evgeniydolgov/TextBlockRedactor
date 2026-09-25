@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createNoteStorage, LOAD_ERROR, NOTE_STORAGE_KEY, SAVE_ERROR } from './noteStorage'
-import { attachmentNote, mixedNote, paragraph } from '../../../editor/testing/noteFixtures'
+import { attachmentNote, mixedNote, paragraph, populatedImage } from '../../../editor/testing/noteFixtures'
 
 afterEach(() => vi.unstubAllGlobals())
 
@@ -16,7 +16,7 @@ describe('noteStorage', () => {
   it('reloads mixed attachments with omitted undefined fields', () => {
     const memory = memoryStorage()
     const storage = createNoteStorage(() => memory)
-    const note = attachmentNote()
+    const note = [...attachmentNote(), populatedImage('populated')]
     expect(storage.save(note).error).toBeNull()
     expect(storage.load()).toEqual({ document: JSON.parse(JSON.stringify(note)), error: null })
     expect(memory.getItem()).not.toContain('previewWidth')

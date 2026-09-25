@@ -4,6 +4,7 @@ import { NodeSelection } from '@tiptap/pm/state'
 import { closeHistory } from '@tiptap/pm/history'
 import { createId } from '../../shared/ids'
 import { isAttachmentType, type AttachmentType } from '../model/noteBlock'
+import type { UploadedImage } from '../images/imageStorage'
 
 export function canAppendAttachment(editor: Editor | null, maxBlocks: number): boolean {
   return !!editor && editor.state.doc.childCount < maxBlocks
@@ -36,6 +37,18 @@ export function deleteSelectedAttachment(editor: Editor, generateId = createId) 
   } else {
     tr.delete(selection.from, selection.to)
   }
+  dispatchHistoryAction(editor, tr)
+  return true
+}
+
+export function updateImageAttachment(editor: Editor, pos: number, image: UploadedImage) {
+  const node = editor.state.doc.nodeAt(pos)
+  if (node?.type.name !== 'image') return false
+  const tr = editor.state.tr.setNodeMarkup(pos, undefined, {
+    ...node.attrs,
+    url: image.id,
+    name: image.name,
+  })
   dispatchHistoryAction(editor, tr)
   return true
 }

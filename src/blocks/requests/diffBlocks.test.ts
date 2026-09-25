@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { paragraph, heading } from '../../editor/testing/noteFixtures'
+import { paragraph, heading, populatedImage } from '../../editor/testing/noteFixtures'
 import { diffBlocks } from './diffBlocks'
 import { createAttachment } from '../../editor/model/noteBlock'
 
@@ -9,6 +9,12 @@ describe('diffBlocks', () => {
     expect(diffBlocks(blocks, JSON.parse(JSON.stringify(blocks))))
       .toEqual({ deleted: [], updated: [], createdIds: new Set() })
     expect(diffBlocks(blocks, [blocks[1]]).deleted).toEqual(['i'])
+  })
+  it('recognizes populated image prop updates', () => {
+    const original = createAttachment('image', 'i')
+    const populated = populatedImage('i')
+    expect(diffBlocks([original], [populated]).updated).toEqual([populated])
+    expect(diffBlocks([populated], [structuredClone(populated)]).updated).toEqual([])
   })
   it('compares content semantically without changing inputs or IDs', () => {
     const original = paragraph('123', 'Привет 🌍')

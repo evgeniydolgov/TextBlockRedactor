@@ -1,24 +1,35 @@
 import { describe, expect, it } from 'vitest'
-import { attachmentNote, heading, mixedNote, paragraph } from '../testing/noteFixtures'
+import { attachmentNote, heading, mixedNote, paragraph, populatedImage } from '../testing/noteFixtures'
 import { createAttachment } from './noteBlock'
 import { validateNote } from './validateNote'
 
 describe('validateNote', () => {
   it('accepts attachment defaults before and after JSON serialization', () => {
-    const note = attachmentNote()
+    const note = [...attachmentNote(), populatedImage('populated')]
     expect(() => validateNote(note)).not.toThrow()
     expect(() => validateNote(JSON.parse(JSON.stringify(note)))).not.toThrow()
   })
 
-  it.each(['image', 'file'] as const)('rejects populated or malformed %s', type => {
+  it.each(['image', 'file'] as const)('rejects malformed %s', type => {
     const block = createAttachment(type, 'a')
     for (const invalid of [
       { ...block, content: [] }, { ...block, content: null },
       { ...block, children: [paragraph()] }, { ...block, id: '' },
-      { ...block, props: { ...block.props, url: 'file.png' } },
-      { ...block, props: { ...block.props, name: 'file.png' } },
+      { ...block, props: { ...block.props, url: 1 } },
+      { ...block, props: { ...block.props, name: null } },
     ]) expect(() => validateNote([invalid])).toThrow()
+    if (type === 'file') {
+      expect(() => validateNote([{ ...block, props: { ...block.props, url: 'file-id' } }])).toThrow()
+      expect(() => validateNote([{ ...block, props: { ...block.props, name: 'file.png' } }])).toThrow()
+    }
     expect(() => validateNote([block, block])).toThrow('id')
+  })
+
+  it('accepts populated image strings and rejects unsupported props', () => {
+    expect(() => validateNote([populatedImage()])).not.toThrow()
+    expect(() => validateNote([{
+      ...populatedImage(), props: { ...populatedImage().props, extra: '' },
+    }])).toThrow('props.extra')
   })
   it.each([{ note: [] }, { note: mixedNote() }])('accepts supported documents', ({ note }) => {
     expect(() => validateNote(note)).not.toThrow()
