@@ -1,8 +1,25 @@
 import { describe, expect, it } from 'vitest'
-import { heading, mixedNote, paragraph } from '../testing/noteFixtures'
+import { attachmentNote, heading, mixedNote, paragraph } from '../testing/noteFixtures'
+import { createAttachment } from './noteBlock'
 import { validateNote } from './validateNote'
 
 describe('validateNote', () => {
+  it('accepts attachment defaults before and after JSON serialization', () => {
+    const note = attachmentNote()
+    expect(() => validateNote(note)).not.toThrow()
+    expect(() => validateNote(JSON.parse(JSON.stringify(note)))).not.toThrow()
+  })
+
+  it.each(['image', 'file'] as const)('rejects populated or malformed %s', type => {
+    const block = createAttachment(type, 'a')
+    for (const invalid of [
+      { ...block, content: [] }, { ...block, content: null },
+      { ...block, children: [paragraph()] }, { ...block, id: '' },
+      { ...block, props: { ...block.props, url: 'file.png' } },
+      { ...block, props: { ...block.props, name: 'file.png' } },
+    ]) expect(() => validateNote([invalid])).toThrow()
+    expect(() => validateNote([block, block])).toThrow('id')
+  })
   it.each([{ note: [] }, { note: mixedNote() }])('accepts supported documents', ({ note }) => {
     expect(() => validateNote(note)).not.toThrow()
   })
@@ -14,7 +31,7 @@ describe('validateNote', () => {
     [[{ ...paragraph(), id: undefined }], 'blocks[0].id'],
     [[{ ...paragraph(), id: 1 }], 'blocks[0].id'],
     [[paragraph(), paragraph()], 'blocks[1].id'],
-    [[{ ...paragraph(), type: 'image' }], 'blocks[0].type'],
+    [[{ ...paragraph(), type: 'video' }], 'blocks[0].type'],
     [[{ ...paragraph(), attrs: {} }], 'blocks[0].attrs'],
     [[{ ...paragraph(), props: null }], 'blocks[0].props'],
     [[{ ...paragraph(), props: {} }], 'blocks[0].props.backgroundColor'],

@@ -3,6 +3,15 @@ import { limitTransactionStub, textDoc } from '../testing/limitTransactionStub'
 import { createLimitController } from './limitController'
 
 describe('instance limit controller', () => {
+  it('trims mixed blocks and rejects history above the new block limit', () => {
+    const controller = createLimitController({ maxBlocks: 3 })
+    const stub = limitTransactionStub([])
+    stub.tr.doc = textDoc(['abc', '', ''], ['p', 'i', 'f'], ['paragraph', 'image', 'file'])
+    controller.configure({ maxNoteCharacters: 3, maxBlocks: 2 }, stub.state)
+    expect(stub.tr.delete).toHaveBeenCalledExactlyOnceWith(6, 7)
+    expect(stub.tr.split).not.toHaveBeenCalled()
+    expect(controller.allows({ docChanged: true, doc: stub.tr.doc })).toBe(false)
+  })
   it('normalizes only changed transactions and stops after the document fits', () => {
     const controller = createLimitController({ maxBlockCharacters: 3 })
     const overflowing = limitTransactionStub(['abcd'])

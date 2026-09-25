@@ -17,6 +17,8 @@ describe('getActiveBlock', () => {
     { name: 'heading', level: 1, expected: 'h1' },
     { name: 'heading', level: 2, expected: 'h2' },
     { name: 'heading', level: 3, expected: 'h3' },
+    { name: 'image', level: undefined, expected: 'image' },
+    { name: 'file', level: undefined, expected: 'file' },
   ])('selects $expected', ({ name, level, expected }) => {
     const { editor, isActive } = createEditorStub()
     isActive.mockImplementation((node, attrs) => node === name && attrs?.level === level)

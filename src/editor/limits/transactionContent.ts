@@ -1,6 +1,7 @@
 import type { Node } from '@tiptap/pm/model'
 import type { Transaction } from '@tiptap/pm/state'
 import { createId } from '../../shared/ids'
+import { isAttachmentType } from '../model/noteBlock'
 import type { ContentLimits } from './limits'
 import { fitsContent, planContent, splitEnds } from './textBudget'
 
@@ -24,7 +25,7 @@ export function normalizeTransaction(
 ): Transaction {
   const blocks = readTextBlocks(tr.doc)
   const texts = blocks.map(block => block.text)
-  const parts = trim ? planContent(texts, limits) : texts.flatMap((text, index) => {
+  const parts = trim ? planContent(texts, limits, blocks.map(block => isAttachmentType(block.node.type.name))) : texts.flatMap((text, index) => {
     let start = 0
     return splitEnds(text, limits.maxBlockCharacters).map(end => {
       const part = { index, start, end }

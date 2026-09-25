@@ -7,6 +7,9 @@ export function blocksToTiptap(blocks: NoteDocument): JSONContent {
   return {
     type: 'doc',
     content: blocks.map((block) => {
+      if (block.type === 'image' || block.type === 'file') {
+        return { type: block.type, attrs: { id: block.id } }
+      }
       const text = block.content.map((part) => part.text).join('')
       return {
         type: block.type,

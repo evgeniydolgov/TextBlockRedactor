@@ -34,7 +34,7 @@ describe('createRequestPreview', () => {
     const output = preview(current)
     current[0].content[0].text = 'Mutated input'
     expect(output).toEqual([{ method: 'PUT', path: '/blocks/a', body: paragraph('a', 'Next') }])
-    if (output[0].method === 'PUT') output[0].body.content[0].text = 'Mutated output'
+    if (output[0].method === 'PUT') output[0].body.content![0].text = 'Mutated output'
     expect(preview([paragraph('a', 'Next')])).toEqual([])
   })
 })

@@ -1,8 +1,15 @@
 import { describe, expect, it } from 'vitest'
 import { paragraph, heading } from '../../editor/testing/noteFixtures'
 import { diffBlocks } from './diffBlocks'
+import { createAttachment } from '../../editor/model/noteBlock'
 
 describe('diffBlocks', () => {
+  it('compares empty attachments after JSON without false updates', () => {
+    const blocks = [createAttachment('image', 'i'), createAttachment('file', 'f')]
+    expect(diffBlocks(blocks, JSON.parse(JSON.stringify(blocks))))
+      .toEqual({ deleted: [], updated: [], createdIds: new Set() })
+    expect(diffBlocks(blocks, [blocks[1]]).deleted).toEqual(['i'])
+  })
   it('compares content semantically without changing inputs or IDs', () => {
     const original = paragraph('123', 'Привет 🌍')
     const equivalent = structuredClone(original)

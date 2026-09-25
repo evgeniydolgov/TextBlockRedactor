@@ -10,6 +10,6 @@ it('uses the common generator without forwarding the editor context', () => {
   const context = { node: { type: { name: 'paragraph' } }, pos: 12 }
   expect(generate(context as Parameters<typeof generate>[0])).toBe('generated-id')
   expect(createId).toHaveBeenCalledExactlyOnceWith()
-  expect(uniqueIdOptions.types).toEqual(['paragraph', 'heading'])
+  expect(uniqueIdOptions.types).toEqual(['paragraph', 'heading', 'image', 'file'])
   expect(uniqueIdOptions.attributeName).toBe('id')
 })

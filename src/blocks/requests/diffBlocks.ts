@@ -2,6 +2,10 @@ import type { NoteBlock, NoteDocument } from '../../editor/model/noteBlock'
 
 function sameContent(a: NoteBlock, b: NoteBlock) {
   if (a.type !== b.type) return false
+  if (a.type === 'image' || a.type === 'file') {
+    return Object.entries(a.props).every(([key, value]) => b.props[key as keyof typeof b.props] === value)
+  }
+  if (b.type === 'image' || b.type === 'file') return false
   if (a.type === 'heading' && b.type === 'heading'
     && (a.props.level !== b.props.level || a.props.isToggleable !== b.props.isToggleable)) return false
   return a.props.backgroundColor === b.props.backgroundColor

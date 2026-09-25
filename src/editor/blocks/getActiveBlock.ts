@@ -3,5 +3,6 @@ import { editorBlocks } from './index'
 
 export function getActiveBlock(editor: Editor | null | undefined) {
   if (!editor) return 'paragraph'
-  return editorBlocks.find((block) => block.isActive(editor))?.id ?? 'paragraph'
+  return editorBlocks.find((block) => block.isActive(editor))?.id
+    ?? (editor.isActive('image') ? 'image' : editor.isActive('file') ? 'file' : 'paragraph')
 }

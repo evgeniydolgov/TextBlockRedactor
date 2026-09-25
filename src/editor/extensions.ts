@@ -9,11 +9,15 @@ import { UndoRedo } from '@tiptap/extensions'
 import { headingLevels } from './blocks/headings'
 import { ContentLimitsExtension } from './limits/ContentLimits'
 import type { LimitController } from './limits/limitController'
+import { AttachmentKeyboard, ImagePlaceholder, FilePlaceholder } from './blocks/AttachmentNode'
 
 export const editorExtensions = [
   Document,
   Paragraph,
   Text,
+  ImagePlaceholder,
+  FilePlaceholder,
+  AttachmentKeyboard,
   NoteHeading.configure({ levels: [...headingLevels] }),
   UniqueID.configure(uniqueIdOptions),
   BlockIdentity,

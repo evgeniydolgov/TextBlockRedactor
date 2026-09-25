@@ -3,11 +3,23 @@ import { validate, version } from 'uuid'
 import { heading, paragraph } from '../testing/noteFixtures'
 import { blockText } from './textBudget'
 import { normalizeNote } from './normalizeNote'
+import { createAttachment } from '../model/noteBlock'
 import { createEditorOptions } from '../model/editorOptions'
 import { prepareInitialDocument } from '../../pages/document/prepareInitialDocument'
 import { createRequestPreview } from '../../blocks/requests/createRequestPreview'
 
 describe('normalizeNote', () => {
+  it('retains attachment shapes at a full text budget and trims only the excess prefix', () => {
+    const image = createAttachment('image', 'image')
+    const file = createAttachment('file', 'file')
+    const input = [paragraph('p', 'abc'), image, file]
+    expect(normalizeNote(input, { maxNoteCharacters: 3 })).toEqual(input)
+    const trimmed = normalizeNote(input, { maxNoteCharacters: 3, maxBlocks: 2 })
+    expect(trimmed).toEqual(input.slice(0, 2))
+    expect(trimmed[1]).not.toHaveProperty('content')
+    expect(normalizeNote([paragraph('p', 'abcd'), image], { maxNoteCharacters: 3 }))
+      .toEqual([paragraph('p', 'abc')])
+  })
   it.each([1, 2, 3] as const)('keeps H%s and ID, creates paragraph continuations', level => {
     const input = [heading(level, 'original', 'abcdefg'), paragraph('next', 'x')]
     const before = structuredClone(input)

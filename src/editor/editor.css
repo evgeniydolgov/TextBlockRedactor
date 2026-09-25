@@ -42,3 +42,23 @@
   font-size: 12px;
   margin: 12px 0 0;
 }
+
+.attachment-placeholder {
+  padding: 16px;
+  margin: 12px 0;
+  border: 1px solid #d9d8d5;
+  border-radius: 6px;
+  background: #f7f7f5;
+}
+
+.attachment-placeholder.ProseMirror-selectednode,
+.attachment-placeholder:focus-visible {
+  outline: 2px solid #4385be;
+  outline-offset: 2px;
+}
+
+.attachment-placeholder button {
+  padding: 8px 12px;
+  color: #787774;
+  pointer-events: none;
+}

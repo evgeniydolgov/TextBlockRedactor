@@ -4,6 +4,18 @@ import { resolveLimits } from './limits'
 import { fitsTransaction, normalizeTransaction } from './transactionContent'
 
 describe('transaction content adapter', () => {
+  it('counts leaf attachments and preserves them at a full text budget during trimming', () => {
+    const { tr, transaction } = limitTransactionStub([])
+    tr.doc = textDoc(['abc', '', ''], ['p', 'image', 'file'], ['paragraph', 'image', 'file'])
+    const limits = resolveLimits({ maxNoteCharacters: 3, maxBlocks: 3 })
+    expect(fitsTransaction({ docChanged: true, doc: tr.doc }, limits)).toBe(true)
+    normalizeTransaction(transaction, limits, true)
+    expect(tr.delete).not.toHaveBeenCalled()
+    expect(tr.split).not.toHaveBeenCalled()
+    expect(fitsTransaction({ docChanged: true, doc: tr.doc }, { ...limits, maxBlocks: 2 })).toBe(false)
+    normalizeTransaction(transaction, { ...limits, maxBlocks: 2 }, true)
+    expect(tr.delete).toHaveBeenCalledExactlyOnceWith(6, 7)
+  })
   it('passes selection-only changes and rejects over-budget documents before normalization', () => {
     const limits = resolveLimits({ maxBlockCharacters: 3, maxNoteCharacters: 6, maxBlocks: 2 })
     const changed = (texts: string[]) => ({ docChanged: true, doc: textDoc(texts) })

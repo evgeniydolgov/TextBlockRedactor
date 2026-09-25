@@ -1,4 +1,5 @@
 import type { NoteDocument } from './noteBlock'
+import { fileProps, imageProps, isAttachmentType } from './noteBlock'
 
 function fail(path: string): never {
   throw new Error(`Некорректная заметка: ${path}`)
@@ -24,6 +25,17 @@ export function validateNote(value: unknown): asserts value is NoteDocument {
     keys(block, ['id', 'type', 'props', 'content', 'children'], path)
     if (typeof block.id !== 'string' || !block.id.trim() || ids.has(block.id)) fail(`${path}.id`)
     ids.add(block.id)
+    if (!Array.isArray(block.children) || block.children.length) fail(`${path}.children`)
+    if (isAttachmentType(block.type)) {
+      const props = record(block.props, `${path}.props`)
+      const defaults = block.type === 'image' ? imageProps : fileProps
+      keys(props, Object.keys(defaults), `${path}.props`)
+      for (const [key, value] of Object.entries(defaults)) {
+        if (props[key] !== value) fail(`${path}.props.${key}`)
+      }
+      if (block.content !== undefined) fail(`${path}.content`)
+      return
+    }
     if (block.type !== 'paragraph' && block.type !== 'heading') fail(`${path}.type`)
     const props = record(block.props, `${path}.props`)
     const propKeys = ['backgroundColor', 'textColor', 'textAlignment']

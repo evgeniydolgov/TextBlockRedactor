@@ -1,5 +1,5 @@
 import type { JSONContent } from '@tiptap/core'
-import { defaultBlockProps } from './noteBlock'
+import { createAttachment, defaultBlockProps, isAttachmentType } from './noteBlock'
 import type { NoteDocument } from './noteBlock'
 import { validateNote } from './validateNote'
 
@@ -9,6 +9,10 @@ export function tiptapToBlocks(document: JSONContent): NoteDocument {
   }
   const blocks = document.content.map((node, index) => {
     const path = `blocks[${index}]`
+    if (isAttachmentType(node.type)) {
+      if (node.marks?.length || node.content?.length) throw new Error(`Неподдерживаемое содержимое: ${path}`)
+      return createAttachment(node.type, node.attrs?.id)
+    }
     if (node.type !== 'paragraph' && node.type !== 'heading') {
       throw new Error(`Неподдерживаемый узел: ${path}.type`)
     }

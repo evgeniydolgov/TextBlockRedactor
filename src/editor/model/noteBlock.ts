@@ -20,9 +20,28 @@ type BlockContent = {
   children: []
 }
 
-export type NoteBlock = BlockContent & (
+export type TextBlock = BlockContent & (
   | { type: 'paragraph'; props: DefaultBlockProps }
   | { type: 'heading'; props: DefaultBlockProps & { level: HeadingLevel; isToggleable: false } }
 )
 
 export type NoteDocument = NoteBlock[]
+
+export type AttachmentType = 'image' | 'file'
+export const fileProps = { backgroundColor: 'default', name: '', url: '', caption: '' } as const
+export const imageProps = { ...fileProps, textAlignment: 'left', showPreview: true, previewWidth: undefined } as const
+export type AttachmentBlock = { id: string; content?: undefined; children: [] } & (
+  | { type: 'file'; props: typeof fileProps }
+  | { type: 'image'; props: typeof imageProps }
+)
+export type NoteBlock = TextBlock | AttachmentBlock
+
+export function isAttachmentType(type: unknown): type is AttachmentType {
+  return type === 'image' || type === 'file'
+}
+
+export function createAttachment(type: AttachmentType, id: string): AttachmentBlock {
+  return type === 'image'
+    ? { id, type, props: { ...imageProps }, children: [] }
+    : { id, type, props: { ...fileProps }, children: [] }
+}

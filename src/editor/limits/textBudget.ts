@@ -1,7 +1,7 @@
 import type { NoteBlock } from '../model/noteBlock'
 import type { ContentLimits } from './limits'
 
-export const blockText = (block: NoteBlock) => block.content.map(part => part.text).join('')
+export const blockText = (block: NoteBlock) => block.content?.map(part => part.text).join('') ?? ''
 
 export function safeEnd(text: string, end: number): number {
   const previous = text.charCodeAt(end - 1)
@@ -39,10 +39,15 @@ export function fitsContent(texts: readonly string[], limits: ContentLimits): bo
 export type TextPart = { index: number; start: number; end: number }
 
 // Loading / lowering limits retains a prefix. Editing uses fitsContent instead.
-export function planContent(texts: readonly string[], limits: ContentLimits): TextPart[] {
+export function planContent(texts: readonly string[], limits: ContentLimits, attachments: readonly boolean[] = []): TextPart[] {
   const parts: TextPart[] = []
   let remaining = limits.maxNoteCharacters
   for (const [index, text] of texts.entries()) {
+    if (attachments[index]) {
+      if (parts.length === limits.maxBlocks) return parts
+      parts.push({ index, start: 0, end: 0 })
+      continue
+    }
     let start = 0
     do {
       if (!remaining || parts.length === limits.maxBlocks) return parts

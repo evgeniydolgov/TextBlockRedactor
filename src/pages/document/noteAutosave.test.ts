@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createDebouncedChange } from '../../editor/model/createDebouncedChange'
 import { bindSaveLifecycle } from '../../editor/model/bindSaveLifecycle'
-import { paragraph } from '../../editor/testing/noteFixtures'
+import { attachmentNote, paragraph } from '../../editor/testing/noteFixtures'
 import { createNoteSaveHandler } from './createNoteSaveHandler'
 import { createNoteStorage, NOTE_STORAGE_KEY } from './storage/noteStorage'
 
@@ -26,6 +26,18 @@ function setup() {
 }
 
 describe('note autosave composition', () => {
+  it('debounces attachment insertion and flushes removal without changing IDs or shapes', () => {
+    const { memory, storage, changes } = setup()
+    const note = attachmentNote()
+    changes.schedule(note)
+    expect(memory.setItem).not.toHaveBeenCalled()
+    vi.advanceTimersByTime(1000)
+    expect(storage.load().document).toEqual(JSON.parse(JSON.stringify(note)))
+    changes.schedule(note.slice(0, -1))
+    changes.flush()
+    expect(storage.load().document).toEqual(JSON.parse(JSON.stringify(note.slice(0, -1))))
+    expect(memory.setItem).toHaveBeenCalledTimes(2)
+  })
   it('does not write on load or during typing and saves only the latest snapshot after the pause', () => {
     const { memory, storage, changes } = setup()
     expect(storage.load().document).toEqual([])

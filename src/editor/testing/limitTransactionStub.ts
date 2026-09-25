@@ -2,11 +2,11 @@ import type { Node } from '@tiptap/pm/model'
 import type { EditorState, Transaction } from '@tiptap/pm/state'
 import { vi } from 'vitest'
 
-export function textDoc(texts: string[], ids = texts.map((_, index) => `id-${index}`)) {
+export function textDoc(texts: string[], ids = texts.map((_, index) => `id-${index}`), types = texts.map(() => 'paragraph')) {
   const paragraph = { name: 'paragraph' }
   let pos = 0
   const nodes = texts.map((text, index) => {
-    const node = { textContent: text, nodeSize: text.length + 2, attrs: { id: ids[index] } }
+    const node = { type: { name: types[index] }, textContent: text, nodeSize: ['image', 'file'].includes(types[index]) ? 1 : text.length + 2, attrs: { id: ids[index] } }
     const entry = { node, pos }
     pos += node.nodeSize
     return entry

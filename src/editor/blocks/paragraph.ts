@@ -1,9 +1,10 @@
 import type { BlockDefinition } from './types'
+import { canFormatText } from './attachmentCommands'
 
 export const paragraphBlock: BlockDefinition = {
   id: 'paragraph',
   label: 'Текст',
   ariaLabel: 'Текст',
-  apply: (editor) => editor.chain().focus().setParagraph().run(),
+  apply: (editor) => canFormatText(editor) && editor.chain().focus().setParagraph().run(),
   isActive: (editor) => editor.isActive('paragraph'),
 }

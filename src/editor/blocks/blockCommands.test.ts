@@ -11,6 +11,12 @@ const cases = [
 ]
 
 describe.each(cases)('$block.id adapter', ({ block, level }) => {
+  it.each(['image', 'file'])('does not convert a selected %s', type => {
+    const stub = createEditorStub()
+    stub.isActive.mockImplementation(name => name === type)
+    expect(block.apply(stub.editor)).toBe(false)
+    expect(stub.chain).not.toHaveBeenCalled()
+  })
   it.each([true, false])('dispatches the command and returns %s from run', (result) => {
     const stub = createEditorStub(result)
 

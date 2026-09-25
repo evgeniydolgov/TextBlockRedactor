@@ -9,7 +9,7 @@ export function TextEditor(props: TextEditorProps) {
 
   return (
     <section className="editor" aria-label="Редактор документа">
-      <EditorToolbar editor={editor} />
+      <EditorToolbar editor={editor} maxBlocks={props.maxBlocks} />
       <EditorContent editor={editor} />
       <p id="editor-hint" className="editor-hint">
         Нажмите на страницу и начните писать. Enter — новый абзац.

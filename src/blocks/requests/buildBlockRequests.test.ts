@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { paragraph } from '../../editor/testing/noteFixtures'
 import { buildBlockRequests } from './buildBlockRequests'
+import { createAttachment } from '../../editor/model/noteBlock'
 
 const a = paragraph('a', 'A')
 const b = paragraph('b', 'B')
@@ -8,6 +9,14 @@ const x = paragraph('x', 'X')
 const y = paragraph('y', 'Y')
 
 describe('buildBlockRequests', () => {
+  it('creates and deletes attachments with their original shape and position', () => {
+    const image = createAttachment('image', 'i')
+    const file = createAttachment('file', 'f')
+    expect(buildBlockRequests([a, image], [a, image, file])).toEqual([
+      { method: 'POST', path: '/blocks', body: { block: file, position: { before: 'i', after: null } } },
+    ])
+    expect(buildBlockRequests([a, image, file], [a, image])).toEqual([{ method: 'DELETE', path: '/blocks/f' }])
+  })
   it('creates one block with exact neighbors and no unsupported noteId', () => {
     expect(buildBlockRequests([a, b], [a, x, b], 'note')).toEqual([
       { method: 'POST', path: '/blocks', body: { block: x, position: { before: 'a', after: 'b' } } },
@@ -72,7 +81,7 @@ describe('buildBlockRequests', () => {
     expect(buildBlockRequests([a, b], [full])).toEqual([
       { method: 'DELETE', path: '/blocks/b' }, { method: 'PUT', path: '/blocks/a', body: full },
     ])
-    if (result[0].method === 'PUT') result[0].body.content[0].text = 'Mutated'
+    if (result[0].method === 'PUT') result[0].body.content![0].text = 'Mutated'
     expect(a.content[0].text).toBe('A')
   })
 })

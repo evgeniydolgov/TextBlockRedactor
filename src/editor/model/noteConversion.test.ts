@@ -1,10 +1,20 @@
 import type { JSONContent } from '@tiptap/core'
 import { describe, expect, it } from 'vitest'
-import { mixedNote, paragraph } from '../testing/noteFixtures'
+import { attachmentNote, mixedNote, paragraph } from '../testing/noteFixtures'
 import { blocksToTiptap } from './blocksToTiptap'
 import { tiptapToBlocks } from './tiptapToBlocks'
 
 describe('note conversion', () => {
+  it('preserves mixed attachment documents through editor and JSON round trips', () => {
+    const note = attachmentNote()
+    const json = JSON.parse(JSON.stringify(note))
+    const doc = blocksToTiptap(json)
+    expect(doc.content?.slice(-2)).toEqual([
+      { type: 'image', attrs: { id: 'image1' } }, { type: 'file', attrs: { id: 'file1' } },
+    ])
+    expect(JSON.parse(JSON.stringify(tiptapToBlocks(doc)))).toEqual(json)
+    expect(note).toEqual(attachmentNote())
+  })
   it('maps all block types and preserves text, order, props and IDs on round trip', () => {
     const note = mixedNote()
     const before = structuredClone(note)
@@ -38,8 +48,8 @@ describe('note conversion', () => {
     expect(tiptapToBlocks(doc)).toEqual(first)
     expect(doc).toEqual(before)
     const second = tiptapToBlocks(doc)
-    second[0].content[0].text = 'Изменено'
-    expect(first[0].content[0].text).toBe('  Привет 🌍 ')
+    second[0].content![0].text = 'Изменено'
+    expect(first[0].content![0].text).toBe('  Привет 🌍 ')
     expect(doc).toEqual(before)
   })
 
