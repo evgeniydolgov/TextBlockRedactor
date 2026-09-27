@@ -2,8 +2,8 @@ import type { Editor } from '@tiptap/core'
 import { useEditorState } from '@tiptap/react'
 import { editorBlocks } from '../blocks'
 import { getActiveBlock } from '../blocks/getActiveBlock'
-import { appendAttachment } from '../blocks/attachmentCommands'
-import { resolveLimits } from '../limits/limits'
+import { appendAttachment } from '../blocks/attachments/attachmentCommands'
+import { resolveLimits } from '../limits/core/limits'
 import './toolbar.css'
 
 type EditorToolbarProps = {

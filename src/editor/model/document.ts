@@ -1,5 +1,5 @@
-import type { NoteDocument } from './noteBlock'
-import type { ContentLimits } from '../limits/limits'
+import type { NoteDocument } from './note/noteBlock'
+import type { ContentLimits } from '../limits/core/limits'
 import type { ImageStorageAdapter } from '../images/imageStorage'
 
 export type TextEditorProps = Partial<ContentLimits> & {

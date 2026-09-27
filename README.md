@@ -44,15 +44,21 @@ npm.cmd run dev
 ```text
 src/
   main.tsx                 # монтирование React
-  App.tsx                  # страница приложения
+  App.tsx                  # подключение страницы документа
   index.css                # общие стили
   editor/
-    TextEditor.tsx         # редактор и кнопки типов абзаца
+    TextEditor.tsx         # композиция панели и редактируемого содержимого
     extensions.ts          # схема документа и расширения
     editor.css             # стили содержимого
-    model/                 # блочная модель, преобразования и задержка передачи
+    blocks/attachments/    # узлы image/file и их команды
+    images/                # адаптер загрузки и получения изображений
+    model/note/            # формат, валидация и преобразования заметки
+    model/lifecycle/       # onChange и жизненный цикл сохранения
     identity/              # сохранение ID при split и смене типа
-    limits/                # бюджеты текста, частичная вставка и адаптеры транзакций
+    limits/core/           # расчёт ограничений
+    limits/input/          # ввод и вставка
+    limits/tiptap/         # интеграция с транзакциями Tiptap
+    toolbar/               # кнопки типов блоков
   pages/document/          # страница, localStorage и logNoteBlocks
 ```
 
@@ -65,7 +71,7 @@ StarterKit не используется: на этом этапе списки,
 
 ```tsx
 import { TextEditor } from './editor/TextEditor'
-import { createEmptyNote } from './editor/model/createEmptyNote'
+import { createEmptyNote } from './editor/model/note/createEmptyNote'
 
 const initialContent = createEmptyNote()
 
@@ -77,8 +83,9 @@ export function MyNote() {
 }
 ```
 
-В рабочем компоненте добавлены только кнопки «Текст / H1 / H2 / H3»,
-доступные подписи, initialContent/onChange/saveDelayMs и три пропса лимитов.
+В рабочем компоненте есть кнопки «Текст / H1 / H2 / H3 / Картинка / Файл»,
+доступные подписи, initialContent/onChange/saveDelayMs, три пропса лимитов и
+необязательный адаптер `imageStorage`.
 
 ## Как пользоваться
 
@@ -131,12 +138,12 @@ localStorage под ключом `text-block-redactor:request-log:v1`.
 
 Unit-тесты запускаются через Vitest: он использует Vite и поддерживает TypeScript,
 поэтому не требует отдельной настройки трансформации TS/ESM, как Jest.
-Тесты находятся рядом с кодом в `*.test.ts` и работают в Node без браузера.
+Тесты находятся в локальных папках `tests` рядом с соответствующими модулями и работают в Node без браузера.
 
 При обычной разработке агент запускает только тесты затронутой области, например:
 
 ```powershell
-npm.cmd test -- src/editor/limits/fitInsertion.test.ts
+npm.cmd test -- src/editor/limits/core/tests/fitInsertion.test.ts
 ```
 
 Минимальный type-check используется при возможности ограничить его затронутым кодом;
@@ -153,7 +160,7 @@ npm.cmd run lint
 ```
 
 `test` выполняет один прогон. Для локального watch указывайте test-файл:
-`npm.cmd run test:watch -- src/editor/limits/fitInsertion.test.ts` (до Ctrl+C).
+`npm.cmd run test:watch -- src/editor/limits/core/tests/fitInsertion.test.ts` (до Ctrl+C).
 Проверяются только наши функции: команды и активность блоков, выбор активного
 блока, конвертация/валидация заметки, адаптеры ID, задержка, lifecycle, localStorage,
 onChange, logger, лимиты и планирование вставки. Методы редактора заменены

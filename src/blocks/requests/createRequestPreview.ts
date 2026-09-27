@@ -1,4 +1,4 @@
-import type { NoteDocument } from '../../editor/model/noteBlock'
+import type { NoteDocument } from '../../editor/model/note/noteBlock'
 import { buildBlockRequests } from './buildBlockRequests'
 
 export function createRequestPreview(initialDocument: NoteDocument, noteId?: string) {

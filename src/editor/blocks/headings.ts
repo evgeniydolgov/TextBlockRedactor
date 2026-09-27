@@ -1,5 +1,5 @@
 import type { BlockDefinition } from './types'
-import { canFormatText } from './attachmentCommands'
+import { canFormatText } from './attachments/attachmentCommands'
 
 export const headingLevels = [1, 2, 3] as const
 

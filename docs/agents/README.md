@@ -99,7 +99,7 @@ npm.cmd run spec -- archive add-local-save --yes
 
 По умолчанию агент проверяет только непосредственно изменённую область: конкретные
 unit-тесты и минимальный доступный type-check. Например:
-`npm.cmd test -- src/editor/limits/fitInsertion.test.ts`.
+`npm.cmd test -- src/editor/limits/core/tests/fitInsertion.test.ts`.
 Для Markdown достаточно чтения изменённых разделов, их diff и локальных ссылок.
 Если корректный локальный type-check невозможен, укажите ограничение без полного build.
 

@@ -1,5 +1,5 @@
-import type { NoteDocument } from '../../../editor/model/noteBlock'
-import { validateNote } from '../../../editor/model/validateNote'
+import type { NoteDocument } from '../../../editor/model/note/noteBlock'
+import { validateNote } from '../../../editor/model/note/validateNote'
 
 export const NOTE_STORAGE_KEY = 'text-block-redactor:note:v1'
 export const LOAD_ERROR = 'Не удалось загрузить заметку. Изменения заменят прежнюю локальную запись.'

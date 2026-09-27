@@ -2,24 +2,24 @@
 
 ## 1. Модель заполненного image-блока
 
-- [x] 1.1 Разрешить строковые `url`, `name` и `caption` только для image, сохранив пустые defaults и прежние ограничения остальных image/file props; дополнить fixtures и проверить пустые, заполненные и некорректные значения командой `npm.cmd test -- src/editor/model/validateNote.test.ts`.
-- [x] 1.2 Перенести `url`, `name` и `caption` в attrs image-узла и обратно без мутаций, потери ID, позиции и JSON round trip; проверить пустой и заполненный смешанный документ командой `npm.cmd test -- src/editor/model/noteConversion.test.ts`.
-- [x] 1.3 Подтвердить, что заполненные props сохраняются и дают обычный UPDATE без изменения лимитов блока: дополнить существующие storage, diff и text-budget сценарии и запустить `npm.cmd test -- src/pages/document/storage/noteStorage.test.ts src/blocks/requests/diffBlocks.test.ts src/editor/limits/textBudget.test.ts`.
+- [x] 1.1 Разрешить строковые `url`, `name` и `caption` только для image, сохранив пустые defaults и прежние ограничения остальных image/file props; дополнить fixtures и проверить пустые, заполненные и некорректные значения командой `npm.cmd test -- src/editor/model/note/tests/validateNote.test.ts`.
+- [x] 1.2 Перенести `url`, `name` и `caption` в attrs image-узла и обратно без мутаций, потери ID, позиции и JSON round trip; проверить пустой и заполненный смешанный документ командой `npm.cmd test -- src/editor/model/note/tests/noteConversion.test.ts`.
+- [x] 1.3 Подтвердить, что заполненные props сохраняются и дают обычный UPDATE без изменения лимитов блока: дополнить существующие storage, diff и text-budget сценарии и запустить `npm.cmd test -- src/pages/document/storage/tests/noteStorage.test.ts src/blocks/requests/tests/diffBlocks.test.ts src/editor/limits/core/tests/textBudget.test.ts`.
 
 ## 2. Независимый адаптер и локальная реализация
 
-- [x] 2.1 Добавить публичные типы `UploadedImage`, `ResolvedImage`, `ImageStorageAdapter` и необязательный `imageStorage` в props редактора без импорта конкретного сервиса; добавить контроллер текущего адаптера с подпиской, проверить отсутствие адаптера, замену экземпляра и отписку командой `npm.cmd test -- src/editor/images/imageStorageController.test.ts`.
-- [x] 2.2 Реализовать `createMemoryImageStorage` на `Map<string, Blob>` с ID через общий `createId`, результатом `{ id, name }` и явной ошибкой неизвестного ID; проверить upload/resolve, уникальные ID и отсутствие персистентности командой `npm.cmd test -- src/editor/images/createMemoryImageStorage.test.ts`.
+- [x] 2.1 Добавить публичные типы `UploadedImage`, `ResolvedImage`, `ImageStorageAdapter` и необязательный `imageStorage` в props редактора без импорта конкретного сервиса; добавить контроллер текущего адаптера с подпиской, проверить отсутствие адаптера, замену экземпляра и отписку командой `npm.cmd test -- src/editor/images/tests/imageStorageController.test.ts`.
+- [x] 2.2 Реализовать `createMemoryImageStorage` на `Map<string, Blob>` с ID через общий `createId`, результатом `{ id, name }` и явной ошибкой неизвестного ID; проверить upload/resolve, уникальные ID и отсутствие персистентности командой `npm.cmd test -- src/editor/images/tests/createMemoryImageStorage.test.ts`.
 - [x] 2.3 Создать единственный экземпляр memory adapter на уровне страницы и передать его в `TextEditor`; чтением локального diff подтвердить отсутствие Blob/data URL в localStorage, новых зависимостей, backend и IndexedDB.
 
 ## 3. Загрузка и история image-блока
 
 - [x] 3.1 Выделить image NodeView из общей placeholder-фабрики, добавить доступную кнопку и скрытый `input type="file"`, сохранив атомарность, выделение и прежний неактивный file NodeView; кнопка SHALL быть недоступна без адаптера, а подписи и управление — доступны с клавиатуры.
-- [x] 3.2 Реализовать временные состояния upload: блокировать повторный выбор, показывать «Загрузка…», при успехе одной транзакцией записывать `url`/`name` с прежними `id`/`caption`, при ошибке не менять документ и позволять повтор. Проверить транзакцию, undo/redo без повторного upload и неизменность file-команд командой `npm.cmd test -- src/editor/blocks/attachmentCommands.test.ts src/editor/images/imageUpload.test.ts`.
+- [x] 3.2 Реализовать временные состояния upload: блокировать повторный выбор, показывать «Загрузка…», при успехе одной транзакцией записывать `url`/`name` с прежними `id`/`caption`, при ошибке не менять документ и позволять повтор. Проверить транзакцию, undo/redo без повторного upload и неизменность file-команд командой `npm.cmd test -- src/editor/blocks/attachments/tests/attachmentCommands.test.ts src/editor/images/tests/imageUpload.test.ts`.
 
 ## 4. Получение и отображение
 
-- [x] 4.1 Реализовать контроллер разрешения image по непустому `url`: состояния loading/error/ready, повтор, смену ID или адаптера и игнорирование устаревших Promise без транзакций редактора. Проверить переходы и отсутствие устаревшего результата командой `npm.cmd test -- src/editor/images/imageResolution.test.ts`.
+- [x] 4.1 Реализовать контроллер разрешения image по непустому `url`: состояния loading/error/ready, повтор, смену ID или адаптера и игнорирование устаревших Promise без транзакций редактора. Проверить переходы и отсутствие устаревшего результата командой `npm.cmd test -- src/editor/images/tests/imageResolution.test.ts`.
 - [x] 4.2 Подключить результат к NodeView: прямой URL назначать изображению без передачи владения редактору, для Blob создавать object URL и освобождать его перед заменой, повтором и destroy. В `imageResolution.test.ts` проверить внедрёнными spies создание и каждый требуемый revoke; после правок задачи 4.1 запустить этот test-файл один раз.
 - [x] 4.3 Добавить минимальные стили изображения, loading/error и retry с форматом CSS из AGENTS.md; чтением локального diff проверить русские подписи, сохранение выделяемой оболочки и отсутствие UI для caption/name/status-check.
 

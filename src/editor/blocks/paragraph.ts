@@ -1,5 +1,5 @@
 import type { BlockDefinition } from './types'
-import { canFormatText } from './attachmentCommands'
+import { canFormatText } from './attachments/attachmentCommands'
 
 export const paragraphBlock: BlockDefinition = {
   id: 'paragraph',

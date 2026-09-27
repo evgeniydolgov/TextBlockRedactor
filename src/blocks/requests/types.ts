@@ -1,4 +1,4 @@
-import type { NoteBlock } from '../../editor/model/noteBlock'
+import type { NoteBlock } from '../../editor/model/note/noteBlock'
 
 export type BlockPositionForRequest = { before?: string | null; after?: string | null }
 export type CreateBlockRequest = { block: NoteBlock; position?: BlockPositionForRequest }

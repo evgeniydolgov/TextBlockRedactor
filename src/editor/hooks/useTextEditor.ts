@@ -1,11 +1,11 @@
 import { useEditor } from '@tiptap/react'
 import { useEffect, useLayoutEffect, useState } from 'react'
 import { createEditorExtensions } from '../extensions'
-import { createLimitController } from '../limits/limitController'
-import { createEditorOptions, createUpdateHandler } from '../model/editorOptions'
+import { createLimitController } from '../limits/tiptap/limitController'
+import { createEditorOptions, createUpdateHandler } from '../model/lifecycle/editorOptions'
 import type { TextEditorProps } from '../model/document'
-import { createDebouncedChange } from '../model/createDebouncedChange'
-import { bindSaveLifecycle } from '../model/bindSaveLifecycle'
+import { createDebouncedChange } from '../model/lifecycle/createDebouncedChange'
+import { bindSaveLifecycle } from '../model/lifecycle/bindSaveLifecycle'
 import { createImageStorageController } from '../images/imageStorage'
 
 export function useTextEditor(props: TextEditorProps) {

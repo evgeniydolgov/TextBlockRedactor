@@ -1,5 +1,5 @@
 import type { BlockRequest } from '../../../blocks/requests/types'
-import type { NoteDocument } from '../../../editor/model/noteBlock'
+import type { NoteDocument } from '../../../editor/model/note/noteBlock'
 
 export const REQUEST_LOG_KEY = 'text-block-redactor:request-log:v1'
 

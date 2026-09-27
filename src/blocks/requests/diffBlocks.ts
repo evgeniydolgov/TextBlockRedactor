@@ -1,4 +1,4 @@
-import type { NoteBlock, NoteDocument } from '../../editor/model/noteBlock'
+import type { NoteBlock, NoteDocument } from '../../editor/model/note/noteBlock'
 
 function sameContent(a: NoteBlock, b: NoteBlock) {
   if (a.type !== b.type) return false

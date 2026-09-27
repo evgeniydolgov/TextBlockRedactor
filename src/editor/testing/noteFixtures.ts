@@ -1,4 +1,4 @@
-import { createAttachment, type AttachmentBlock, type TextBlock, type HeadingLevel } from '../model/noteBlock'
+import { createAttachment, type AttachmentBlock, type TextBlock, type HeadingLevel } from '../model/note/noteBlock'
 
 export function paragraph(id = 'p1', text = ''): Extract<TextBlock, { type: 'paragraph' }> {
   return {

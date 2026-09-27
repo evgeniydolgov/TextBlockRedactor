@@ -1,4 +1,4 @@
-import type { NoteDocument } from '../../editor/model/noteBlock'
+import type { NoteDocument } from '../../editor/model/note/noteBlock'
 import { logNoteBlocks } from './logNoteBlocks'
 import type { SaveResult } from './storage/noteStorage'
 import { NOTE_STORAGE_KEY } from './storage/noteStorage'

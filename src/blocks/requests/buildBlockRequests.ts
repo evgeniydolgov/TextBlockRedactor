@@ -1,4 +1,4 @@
-import type { NoteDocument } from '../../editor/model/noteBlock'
+import type { NoteDocument } from '../../editor/model/note/noteBlock'
 import { diffBlocks } from './diffBlocks'
 import type { BlockRequest } from './types'
 
