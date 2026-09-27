@@ -5,6 +5,8 @@ export function createRequestPreview(initialDocument: NoteDocument, noteId?: str
   let previous = structuredClone(initialDocument)
   return (current: NoteDocument) => {
     const requests = buildBlockRequests(previous, current, noteId)
+    // сейчас работает синхронно но потом должно перезаписывать только 
+    // после обновления бэкенда
     previous = structuredClone(current)
     return requests
   }

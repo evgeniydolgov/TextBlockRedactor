@@ -23,7 +23,7 @@ describe('imageUpload', () => {
   it('keeps the document callback untouched on errors, duplicate starts and destroy', async () => {
     let finish: ((value: { id: string; name: string }) => void) | undefined
     const storage: ImageStorageAdapter = {
-      upload: vi.fn(() => new Promise(resolve => { finish = resolve })),
+      upload: vi.fn(() => new Promise<{ id: string; name: string }>(resolve => { finish = resolve })),
       resolve: vi.fn(),
     }
     const onUploaded = vi.fn()
