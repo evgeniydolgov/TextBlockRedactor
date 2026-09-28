@@ -19,6 +19,8 @@ describe('normalizeNote', () => {
     expect(trimmed[1]).not.toHaveProperty('content')
     expect(normalizeNote([paragraph('p', 'abcd'), image], { maxNoteCharacters: 3 }))
       .toEqual([paragraph('p', 'abc')])
+    expect(normalizeNote([paragraph('p', 'abc'), image, paragraph('empty'), file], { maxNoteCharacters: 3 }))
+      .toEqual([paragraph('p', 'abc'), image])
   })
   it.each([1, 2, 3] as const)('keeps H%s and ID, creates paragraph continuations', level => {
     const input = [heading(level, 'original', 'abcdefg'), paragraph('next', 'x')]

@@ -9,6 +9,7 @@ import { createImageViewElements } from './imageViewElements'
 export function createImageNodeView(storage: ImageStorageController): NodeViewRenderer {
   return ({ editor, node, getPos }) => {
     let currentNode = node
+    const blockId: string = node.attrs.id
     let uploadState: ImageUploadState = 'idle'
     let resolutionState: ImageResolutionState = { type: 'idle' }
     const { dom, chooseButton, retryButton, input, render: renderElements } = createImageViewElements(node.attrs.id)
@@ -18,7 +19,7 @@ export function createImageNodeView(storage: ImageStorageController): NodeViewRe
       getAdapter: storage.get,
       onUploaded: uploaded => {
         const pos = getPos()
-        if (typeof pos === 'number') updateImageAttachment(editor, pos, uploaded)
+        if (typeof pos === 'number') updateImageAttachment(editor, pos, blockId, uploaded)
       },
       onStateChange: state => { uploadState = state; render() },
     })
@@ -61,7 +62,7 @@ export function createImageNodeView(storage: ImageStorageController): NodeViewRe
     return {
       dom,
       update(updatedNode) {
-        if (updatedNode.type.name !== 'image') return false
+        if (updatedNode.type.name !== 'image' || updatedNode.attrs.id !== blockId) return false
         const previousUrl = currentNode.attrs.url
         currentNode = updatedNode
         dom.dataset.id = updatedNode.attrs.id

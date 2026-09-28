@@ -3,6 +3,7 @@ import { Schema } from '@tiptap/pm/model'
 import { EditorState, NodeSelection, TextSelection } from '@tiptap/pm/state'
 import { history, redo, undo } from '@tiptap/pm/history'
 import { describe, expect, it, vi } from 'vitest'
+import { createImageUpload } from '../../../images/imageUpload'
 import { appendAttachment, canAppendAttachment, deleteSelectedAttachment, updateFileAttachment, updateImageAttachment } from '../attachmentCommands'
 
 // Only the transaction/history model runs here: no Tiptap editor, DOM or browser.
@@ -119,15 +120,48 @@ describe('attachment commands', () => {
     const s = setup()
     appendAttachment(s.editor, 'image', 5, () => 'image')
     const pos = s.state.doc.content.size - 1
-    expect(updateImageAttachment(s.editor, pos, { id: 'stored', name: 'photo.png' })).toBe(true)
+    s.dispatch(s.state.tr.setNodeMarkup(pos, undefined, {
+      id: 'image', url: '', name: '', caption: 'Подпись',
+    }))
+    expect(updateImageAttachment(s.editor, pos, 'image', { id: 'stored', name: 'photo.png' })).toBe(true)
     expect(s.state.doc.nodeAt(pos)?.attrs).toEqual({
-      id: 'image', url: 'stored', name: 'photo.png', caption: '',
+      id: 'image', url: 'stored', name: 'photo.png', caption: 'Подпись',
     })
     undo(s.state, s.dispatch)
-    expect(s.state.doc.nodeAt(pos)?.attrs).toEqual({ id: 'image', url: '', name: '', caption: '' })
+    expect(s.state.doc.nodeAt(pos)?.attrs).toEqual({ id: 'image', url: '', name: '', caption: 'Подпись' })
     redo(s.state, s.dispatch)
     expect(s.state.doc.nodeAt(pos)?.attrs.url).toBe('stored')
-    expect(updateImageAttachment(s.editor, 0, { id: 'ignored', name: 'ignored' })).toBe(false)
+    const dispatches = s.dispatch.mock.calls.length
+    expect(updateImageAttachment(s.editor, pos, 'image', { id: 'ignored', name: 'ignored' })).toBe(false)
+    expect(updateImageAttachment(s.editor, 0, 'image', { id: 'ignored', name: 'ignored' })).toBe(false)
+    expect(s.dispatch).toHaveBeenCalledTimes(dispatches)
+  })
+
+  it.each(['replace', 'delete'] as const)('ignores a late image upload after %s', async change => {
+    const s = setup()
+    appendAttachment(s.editor, 'image', 5, () => 'original')
+    const pos = s.state.doc.content.size - 1
+    let finish: ((image: { id: string; name: string }) => void) | undefined
+    const upload = createImageUpload({
+      getAdapter: () => ({
+        upload: () => new Promise<{ id: string; name: string }>(resolve => { finish = resolve }),
+        resolve: vi.fn(),
+      }),
+      onUploaded: image => { updateImageAttachment(s.editor, pos, 'original', image) },
+      onStateChange: vi.fn(),
+    })
+    const pending = upload.upload(new File(['x'], 'photo.png'))
+    if (change === 'replace') {
+      s.dispatch(s.state.tr.replaceWith(pos, pos + 1, schema.node('image', { id: 'replacement' })))
+    } else {
+      s.dispatch(s.state.tr.delete(pos, pos + 1))
+    }
+    const before = s.state.doc.toJSON()
+    const dispatches = s.dispatch.mock.calls.length
+    finish?.({ id: 'late', name: 'photo.png' })
+    await pending
+    expect(s.state.doc.toJSON()).toEqual(before)
+    expect(s.dispatch).toHaveBeenCalledTimes(dispatches)
   })
 
   it('updates only the original empty file and preserves metadata through undo/redo', () => {

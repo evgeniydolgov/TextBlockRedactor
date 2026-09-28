@@ -42,9 +42,9 @@ export function deleteSelectedAttachment(editor: Editor, generateId = createId) 
   return true
 }
 
-export function updateImageAttachment(editor: Editor, pos: number, image: UploadedImage) {
+export function updateImageAttachment(editor: Editor, pos: number, blockId: string, image: UploadedImage) {
   const node = editor.state.doc.nodeAt(pos)
-  if (node?.type.name !== 'image') return false
+  if (node?.type.name !== 'image' || node.attrs.id !== blockId || node.attrs.url) return false
   const tr = editor.state.tr.setNodeMarkup(pos, undefined, {
     ...node.attrs,
     url: image.id,
