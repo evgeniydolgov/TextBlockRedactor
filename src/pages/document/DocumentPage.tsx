@@ -6,6 +6,7 @@ import { createRequestLogStorage } from './storage/requestLogStorage'
 import { createRequestPreview } from '../../blocks/requests/createRequestPreview'
 import { prepareInitialDocument } from './prepareInitialDocument'
 import { createMemoryImageStorage } from '../../editor/images/createMemoryImageStorage'
+import { createMemoryFileStorage } from '../../editor/files/createMemoryFileStorage'
 import './document-page.css'
 
 const NOTE_SAVE_DELAY_MS = 1000
@@ -15,6 +16,7 @@ const NOTE_CONTENT_LIMITS = {
   maxBlocks: 100,
 }
 const imageStorage = createMemoryImageStorage()
+const fileStorage = createMemoryFileStorage()
 
 export function DocumentPage({ noteId }: { noteId?: string }) {
   const [storage] = useState(() => createNoteStorage())
@@ -38,6 +40,7 @@ export function DocumentPage({ noteId }: { noteId?: string }) {
         onChange={saveNote}
         saveDelayMs={NOTE_SAVE_DELAY_MS}
         imageStorage={imageStorage}
+        fileStorage={fileStorage}
         {...NOTE_CONTENT_LIMITS}
       />
       <footer role="status">{error ?? 'Автосохранение на этом устройстве'}</footer>

@@ -5,6 +5,7 @@ import { closeHistory } from '@tiptap/pm/history'
 import { createId } from '../../../shared/ids'
 import { isAttachmentType, type AttachmentType } from '../../model/note/noteBlock'
 import type { UploadedImage } from '../../images/imageStorage'
+import type { UploadedFile } from '../../files/fileStorage'
 
 export function canAppendAttachment(editor: Editor | null, maxBlocks: number): boolean {
   return !!editor && editor.state.doc.childCount < maxBlocks
@@ -50,6 +51,19 @@ export function updateImageAttachment(editor: Editor, pos: number, image: Upload
     name: image.name,
   })
   dispatchHistoryAction(editor, tr)
+  return true
+}
+
+export function updateFileAttachment(editor: Editor, pos: number, blockId: string, file: UploadedFile) {
+  const node = editor.state.doc.nodeAt(pos)
+  if (node?.type.name !== 'file' || node.attrs.id !== blockId || node.attrs.url) return false
+  const tr = editor.state.tr.setNodeMarkup(pos, undefined, {
+    ...node.attrs,
+    url: file.id,
+    name: file.name,
+  })
+  editor.view.dispatch(closeHistory(tr))
+  editor.view.dispatch(closeHistory(editor.state.tr))
   return true
 }
 

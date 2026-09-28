@@ -13,12 +13,12 @@ import { AttachmentKeyboard } from './blocks/attachments/AttachmentKeyboard'
 import { ImagePlaceholder } from './blocks/attachments/ImageNode'
 import { FilePlaceholder } from './blocks/attachments/FileNode'
 import type { ImageStorageController } from './images/imageStorage'
+import type { FileStorageController } from './files/fileStorage'
 
 const baseEditorExtensions = [
   Document,
   Paragraph,
   Text,
-  FilePlaceholder,
   AttachmentKeyboard,
   NoteHeading.configure({ levels: [...headingLevels] }),
   UniqueID.configure(uniqueIdOptions),
@@ -29,9 +29,11 @@ const baseEditorExtensions = [
 export const createEditorExtensions = (
   controller: LimitController,
   imageStorage: ImageStorageController,
+  fileStorage: FileStorageController,
 ) => [
   ...baseEditorExtensions.slice(0, 3),
   ImagePlaceholder.configure({ storage: imageStorage }),
+  FilePlaceholder.configure({ storage: fileStorage }),
   ...baseEditorExtensions.slice(3),
   ContentLimitsExtension.configure({ controller }),
 ]

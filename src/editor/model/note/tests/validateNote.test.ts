@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { attachmentNote, heading, mixedNote, paragraph, populatedImage } from '../../../testing/noteFixtures'
+import { attachmentNote, heading, mixedNote, paragraph, populatedFile, populatedImage } from '../../../testing/noteFixtures'
 import { createAttachment } from '../noteBlock'
 import { validateNote } from '../validateNote'
 
 describe('validateNote', () => {
   it('accepts attachment defaults before and after JSON serialization', () => {
-    const note = [...attachmentNote(), populatedImage('populated')]
+    const note = [...attachmentNote(), populatedImage('populated'), populatedFile('populated-file')]
     expect(() => validateNote(note)).not.toThrow()
     expect(() => validateNote(JSON.parse(JSON.stringify(note)))).not.toThrow()
   })
@@ -18,10 +18,6 @@ describe('validateNote', () => {
       { ...block, props: { ...block.props, url: 1 } },
       { ...block, props: { ...block.props, name: null } },
     ]) expect(() => validateNote([invalid])).toThrow()
-    if (type === 'file') {
-      expect(() => validateNote([{ ...block, props: { ...block.props, url: 'file-id' } }])).toThrow()
-      expect(() => validateNote([{ ...block, props: { ...block.props, name: 'file.png' } }])).toThrow()
-    }
     expect(() => validateNote([block, block])).toThrow('id')
   })
 
@@ -30,6 +26,12 @@ describe('validateNote', () => {
     expect(() => validateNote([{
       ...populatedImage(), props: { ...populatedImage().props, extra: '' },
     }])).toThrow('props.extra')
+  })
+  it('accepts populated file strings and rejects non-string metadata', () => {
+    const file = populatedFile()
+    expect(() => validateNote([file])).not.toThrow()
+    expect(() => validateNote([{ ...file, props: { ...file.props, caption: 1 } }]))
+      .toThrow('props.caption')
   })
   it.each([{ note: [] }, { note: mixedNote() }])('accepts supported documents', ({ note }) => {
     expect(() => validateNote(note)).not.toThrow()

@@ -12,17 +12,15 @@ export function tiptapToBlocks(document: JSONContent): NoteDocument {
     if (isAttachmentType(node.type)) {
       if (node.marks?.length || node.content?.length) throw new Error(`Неподдерживаемое содержимое: ${path}`)
       const attachment = createAttachment(node.type, node.attrs?.id)
-      return node.type === 'image'
-        ? {
-            ...attachment,
-            props: {
-              ...attachment.props,
-              url: node.attrs?.url,
-              name: node.attrs?.name,
-              caption: node.attrs?.caption,
-            },
-          }
-        : attachment
+      return {
+        ...attachment,
+        props: {
+          ...attachment.props,
+          url: node.attrs?.url,
+          name: node.attrs?.name,
+          caption: node.attrs?.caption,
+        },
+      }
     }
     if (node.type !== 'paragraph' && node.type !== 'heading') {
       throw new Error(`Неподдерживаемый узел: ${path}.type`)

@@ -31,3 +31,8 @@ export function populatedImage(id = 'image1'): Extract<AttachmentBlock, { type: 
   const image = createAttachment('image', id)
   return { ...image, props: { ...image.props, url: 'stored-image-id', name: 'photo.png', caption: 'Подпись' } }
 }
+
+export function populatedFile(id = 'file1'): Extract<AttachmentBlock, { type: 'file' }> {
+  const file = createAttachment('file', id)
+  return { ...file, props: { ...file.props, url: 'stored-file-id', name: 'report.pdf', caption: 'Описание' } }
+}

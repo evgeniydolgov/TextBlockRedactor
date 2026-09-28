@@ -3,7 +3,7 @@ import { Schema } from '@tiptap/pm/model'
 import { EditorState, NodeSelection, TextSelection } from '@tiptap/pm/state'
 import { history, redo, undo } from '@tiptap/pm/history'
 import { describe, expect, it, vi } from 'vitest'
-import { appendAttachment, canAppendAttachment, deleteSelectedAttachment, updateImageAttachment } from '../attachmentCommands'
+import { appendAttachment, canAppendAttachment, deleteSelectedAttachment, updateFileAttachment, updateImageAttachment } from '../attachmentCommands'
 
 // Only the transaction/history model runs here: no Tiptap editor, DOM or browser.
 const schema = new Schema({ nodes: {
@@ -13,7 +13,9 @@ const schema = new Schema({ nodes: {
   image: { group: 'block', atom: true, attrs: {
     id: { default: null }, url: { default: '' }, name: { default: '' }, caption: { default: '' },
   } },
-  file: { group: 'block', atom: true, attrs: { id: { default: null } } },
+  file: { group: 'block', atom: true, attrs: {
+    id: { default: null }, url: { default: '' }, name: { default: '' }, caption: { default: '' },
+  } },
 } })
 
 function setup(onlyAttachment = false) {
@@ -126,5 +128,55 @@ describe('attachment commands', () => {
     redo(s.state, s.dispatch)
     expect(s.state.doc.nodeAt(pos)?.attrs.url).toBe('stored')
     expect(updateImageAttachment(s.editor, 0, { id: 'ignored', name: 'ignored' })).toBe(false)
+  })
+
+  it('updates only the original empty file and preserves metadata through undo/redo', () => {
+    const s = setup()
+    appendAttachment(s.editor, 'file', 5, () => 'file-block')
+    let pos = s.state.doc.content.size - 1
+    s.dispatch(s.state.tr.setNodeMarkup(pos, undefined, {
+      id: 'file-block', url: '', name: '', caption: 'Подпись',
+    }))
+    s.dispatch(s.state.tr.insertText('x', 2))
+    pos = s.state.doc.content.size - 1
+    expect(updateFileAttachment(s.editor, pos, 'file-block', { id: 'stored', name: 'report.pdf' })).toBe(true)
+    expect(s.focus).toHaveBeenCalledOnce()
+    expect(s.state.doc.firstChild?.textContent).toBe('axbc')
+    expect(s.state.doc.nodeAt(pos)?.attrs).toEqual({
+      id: 'file-block', url: 'stored', name: 'report.pdf', caption: 'Подпись',
+    })
+    undo(s.state, s.dispatch)
+    expect(s.state.doc.nodeAt(pos)?.attrs.url).toBe('')
+    expect(s.state.doc.nodeAt(pos)?.attrs.id).toBe('file-block')
+    redo(s.state, s.dispatch)
+    expect(s.state.doc.nodeAt(pos)?.attrs.url).toBe('stored')
+    expect(updateFileAttachment(s.editor, pos, 'file-block', { id: 'again', name: 'wrong' })).toBe(false)
+  })
+
+  it('rejects a late file result after deletion or when the position belongs to another block', () => {
+    const s = setup()
+    appendAttachment(s.editor, 'file', 5, () => 'old')
+    const pos = s.state.doc.content.size - 1
+    s.dispatch(s.state.tr.setSelection(NodeSelection.create(s.state.doc, pos)))
+    deleteSelectedAttachment(s.editor)
+    appendAttachment(s.editor, 'file', 5, () => 'new')
+    expect(updateFileAttachment(s.editor, pos, 'old', { id: 'late', name: 'old.pdf' })).toBe(false)
+    expect(s.state.doc.nodeAt(pos)?.attrs.id).toBe('new')
+    expect(s.state.doc.nodeAt(pos)?.attrs.url).toBe('')
+    expect(updateFileAttachment(s.editor, 0, 'old', { id: 'late', name: 'old.pdf' })).toBe(false)
+  })
+
+  it('restores populated file metadata after Backspace and undo', () => {
+    const s = setup()
+    appendAttachment(s.editor, 'file', 5, () => 'block')
+    const pos = s.state.doc.content.size - 1
+    updateFileAttachment(s.editor, pos, 'block', { id: 'stored', name: 'report.pdf' })
+    s.dispatch(s.state.tr.setSelection(NodeSelection.create(s.state.doc, pos)))
+    expect(deleteSelectedAttachment(s.editor)).toBe(true)
+    expect(s.state.doc.childCount).toBe(1)
+    undo(s.state, s.dispatch)
+    expect(s.state.doc.nodeAt(pos)?.attrs).toEqual({
+      id: 'block', url: 'stored', name: 'report.pdf', caption: '',
+    })
   })
 })

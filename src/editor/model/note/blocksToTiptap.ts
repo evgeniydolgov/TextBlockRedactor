@@ -10,14 +10,12 @@ export function blocksToTiptap(blocks: NoteDocument): JSONContent {
       if (block.type === 'image' || block.type === 'file') {
         return {
           type: block.type,
-          attrs: block.type === 'image'
-            ? {
-                id: block.id,
-                url: block.props.url,
-                name: block.props.name,
-                caption: block.props.caption,
-              }
-            : { id: block.id },
+          attrs: {
+            id: block.id,
+            url: block.props.url,
+            name: block.props.name,
+            caption: block.props.caption,
+          },
         }
       }
       const text = block.content.map((part) => part.text).join('')

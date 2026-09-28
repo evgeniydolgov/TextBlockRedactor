@@ -31,7 +31,7 @@ export function validateNote(value: unknown): asserts value is NoteDocument {
       const defaults = block.type === 'image' ? imageProps : fileProps
       keys(props, Object.keys(defaults), `${path}.props`)
       for (const [key, value] of Object.entries(defaults)) {
-        if (block.type === 'image' && ['url', 'name', 'caption'].includes(key)) {
+        if (['url', 'name', 'caption'].includes(key)) {
           if (typeof props[key] !== 'string') fail(`${path}.props.${key}`)
           continue
         }

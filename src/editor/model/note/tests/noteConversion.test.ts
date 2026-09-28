@@ -1,20 +1,23 @@
 import type { JSONContent } from '@tiptap/core'
 import { describe, expect, it } from 'vitest'
-import { attachmentNote, mixedNote, paragraph, populatedImage } from '../../../testing/noteFixtures'
+import { attachmentNote, mixedNote, paragraph, populatedFile, populatedImage } from '../../../testing/noteFixtures'
 import { blocksToTiptap } from '../blocksToTiptap'
 import { tiptapToBlocks } from '../tiptapToBlocks'
 
 describe('note conversion', () => {
   it('preserves mixed attachment documents through editor and JSON round trips', () => {
-    const note = [...attachmentNote(), populatedImage('populated')]
+    const note = [...attachmentNote(), populatedImage('populated'), populatedFile('populated-file')]
     const before = structuredClone(note)
     const json = JSON.parse(JSON.stringify(note))
     const doc = blocksToTiptap(json)
-    expect(doc.content?.slice(-3)).toEqual([
+    expect(doc.content?.slice(-4)).toEqual([
       { type: 'image', attrs: { id: 'image1', url: '', name: '', caption: '' } },
-      { type: 'file', attrs: { id: 'file1' } },
+      { type: 'file', attrs: { id: 'file1', url: '', name: '', caption: '' } },
       { type: 'image', attrs: {
         id: 'populated', url: 'stored-image-id', name: 'photo.png', caption: 'Подпись',
+      } },
+      { type: 'file', attrs: {
+        id: 'populated-file', url: 'stored-file-id', name: 'report.pdf', caption: 'Описание',
       } },
     ])
     expect(JSON.parse(JSON.stringify(tiptapToBlocks(doc)))).toEqual(json)
