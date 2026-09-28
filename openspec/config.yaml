@@ -4,9 +4,13 @@ context: |
   Проект: локальный минимальный текстовый редактор.
   Стек: React 19, TypeScript, Vite, Tiptap OSS 3, CSS.
   Backend, облако, коллаборация и платные расширения отсутствуют.
-  Сейчас: текст, абзацы, H1-H3, undo/redo; одна заметка сохраняется в localStorage.
+  Сейчас: текст, абзацы, H1-H3, image/file, undo/redo; одна заметка сохраняется в localStorage.
   Один экземпляр редактора на документ; initialContent и onChange(NoteDocument).
-  NoteDocument — плоский массив BlockNote-совместимых paragraph/heading H1-H3.
+  NoteDocument — плоский массив BlockNote-совместимых paragraph/heading H1-H3/image/file.
+  Image/file не имеют текстового content; их props.url хранит непрозрачный ID содержимого,
+  props.name и props.caption — строки. Бинарные данные в заметку не записываются.
+  Необязательные imageStorage/fileStorage загружают File и разрешают ID в URL либо Blob.
+  Демонстрационные адаптеры держат Blob в Map только до перезагрузки страницы.
   Пропсы maxBlockCharacters/maxNoteCharacters/maxBlocks имеют defaults 8000/50000/100.
   Считается .length объединённых text (UTF-16); surrogate pairs не разрываются.
   Переполнение создаёт paragraph с UUID v7. Paste сохраняет только помещающийся префикс.
@@ -18,7 +22,9 @@ context: |
   Ключ localStorage text-block-redactor:note:v1; загрузка до создания редактора.
   Ошибки storage видны пользователю и не прерывают редактирование.
   Preview сравнивает начальный/последний обработанный снимок и выводит [note:requests].
-  HTTP не выполняется; before — предыдущий ID, after — следующий, на границах null.
+  Preview запросов не выполняет HTTP; демонстрационные хранилища тоже работают без сети.
+  Подключаемые адаптеры могут обращаться к внешнему сервису. В preview before —
+  предыдущий ID, after — следующий, на границах null.
   Последний цикл записан в text-block-redactor:request-log:v1 без истории и времени.
   Он содержит requests и storage { key, data, success, error }; не служит базой загрузки.
   Прочитай AGENTS.md и docs/agents/README.md.

@@ -3,9 +3,9 @@
 ## Разработка с агентами и OpenSpec
 
 Начните с [AGENTS.md](AGENTS.md) и [процесса работы](docs/agents/README.md).
-Текущие требования: [спецификация редактора](openspec/specs/text-editor/spec.md).
-Блочный API до архивации описан в [изменении](openspec/changes/blocknote-compatible-note-model/specs/text-editor/spec.md).
-Автосохранение до архивации описано в [изменении](openspec/changes/debounce-local-note-save/specs/text-editor/spec.md).
+Текущие требования: [формат блоков](openspec/specs/text-editor/spec.md#requirement-blocknote-compatible-supported-block-format)
+и [автосохранение](openspec/specs/text-editor/spec.md#requirement-configurable-idle-delay)
+в основной спецификации редактора.
 Проверка спецификаций: `npm.cmd run spec:validate` — агентом только по явной команде полного quality gate.
 
 React + TypeScript + Vite + Tiptap OSS + обычный CSS.
@@ -52,6 +52,7 @@ src/
     editor.css             # стили содержимого
     blocks/attachments/    # узлы image/file и их команды
     images/                # адаптер загрузки и получения изображений
+    files/                 # адаптер загрузки и скачивания файлов
     model/note/            # формат, валидация и преобразования заметки
     model/lifecycle/       # onChange и жизненный цикл сохранения
     identity/              # сохранение ID при split и смене типа
@@ -62,7 +63,8 @@ src/
   pages/document/          # страница, localStorage и logNoteBlocks
 ```
 
-Подключены Document, Paragraph, Text, Heading (H1–H3), UndoRedo, UniqueID и адаптеры ID.
+Подключены Document, Paragraph, Text, Heading (H1–H3), image, file, UndoRedo,
+UniqueID и адаптеры ID.
 StarterKit не используется: на этом этапе списки, цитаты и форматирование не нужны.
 
 ## Самый короткий пример
@@ -85,15 +87,22 @@ export function MyNote() {
 
 В рабочем компоненте есть кнопки «Текст / H1 / H2 / H3 / Картинка / Файл»,
 доступные подписи, initialContent/onChange/saveDelayMs, три пропса лимитов и
-необязательный адаптер `imageStorage`.
+необязательные адаптеры `imageStorage` и `fileStorage`.
 
 ## Как пользоваться
 
 - Нажмите в пустую область и вводите текст. Backspace/Delete удаляют его.
 - Enter создаёт новый блок; пустой заголовок по Enter становится абзацем.
 - Кнопки «Текст», H1, H2, H3 меняют текущий блок.
+- Кнопки «Картинка» и «Файл» добавляют блок в конец заметки. Внутри блока можно
+  выбрать изображение или файл; после загрузки файл скачивается кнопкой «Скачать».
 - В начале строки можно набрать `# `, `## ` или `### ` для заголовка.
 - Ctrl+Z — отмена, Ctrl+Shift+Z — повтор (на macOS — Cmd).
+
+Адаптеры загружают выбранный файл и возвращают его ID и имя. Заметка сохраняет
+эти строки, а изображение получает содержимое по ID для показа. Файл запрашивается
+по ID при нажатии «Скачать». На странице используются временные хранилища в памяти:
+после перезагрузки блоки остаются в заметке, но их содержимое уже недоступно.
 
 Заметка сохраняется в localStorage через секунду после последнего изменения
 и восстанавливается после обновления страницы. При закрытии, обновлении или
@@ -110,7 +119,8 @@ export function MyNote() {
 
 ## Аккуратное расширение
 
-`initialContent` задаёт начальный `NoteDocument` — массив блоков paragraph/heading.
+`initialContent` задаёт начальный `NoteDocument` — массив блоков paragraph,
+heading H1–H3, image и file.
 Это не управляемое React-поле: изменение этого пропа не загружает новый документ.
 `onChange` получает последний массив блоков после паузы `saveDelayMs` (по умолчанию
 1000 мс), а не `editor.getJSON()`. Каждый ввод перезапускает ожидание.
