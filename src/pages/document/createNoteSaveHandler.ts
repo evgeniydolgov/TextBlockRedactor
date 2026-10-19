@@ -28,5 +28,6 @@ export function createNoteSaveHandler(
         success: result.error === null, error: result.error,
       } })
     }
+    return result
   }
 }
