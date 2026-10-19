@@ -286,12 +286,12 @@ TextEditor SHALL expose saveDelayMs in milliseconds, defaulting to 1000. Each do
 - **THEN** новый таймер не создаётся, существующее ожидание не сбрасывается и запись не производится
 
 ### Requirement: Local note persistence
-The note page SHALL store one current NoteDocument in localStorage and restore it on opening. It SHALL preserve supported block data and existing IDs without version validation or regeneration, and SHALL keep editing available if storage fails.
+The note page SHALL store one current NoteDocument in localStorage and restore it on opening. It SHALL preserve supported block data and existing IDs without version validation or regeneration, and SHALL keep editing available if storage fails. Local persistence SHALL remain independent of the optional PUT adapter; without that adapter no network save SHALL occur.
 
 #### Scenario: Save and reopen
 - **WHEN** onChange передал блоки, запись удалась и пользователь перезагрузил страницу
 - **THEN** восстанавливаются порядок, текст, типы, уровни, props и ID сохранённых блоков
-- **AND** история undo/redo начинается заново; сетевых запросов для сохранения нет
+- **AND** история undo/redo начинается заново; без подключённого PUT-адаптера сетевых запросов для сохранения нет
 
 #### Scenario: Missing or empty note
 - **WHEN** запись отсутствует либо содержит корректный пустой массив
